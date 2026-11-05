@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}My Surplus Listings — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Surplus Listings</h1>
+        <p class="page-subtitle">Track, edit, or cancel your published food donations.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.create_donation') }}" class="btn btn-primary">+ New Food Listing</a>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div style="margin-bottom: var(--space-md); display: flex; gap: var(--space-xs); flex-wrap: wrap;">
+      <a href="{{ url_for('donor.donations_list', status='all') }}" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+      <a href="{{ url_for('donor.donations_list', status='available') }}" class="btn btn-sm {% if status_filter == 'available' %}btn-primary{% else %}btn-secondary{% endif %}">Available</a>
+      <a href="{{ url_for('donor.donations_list', status='confirmed') }}" class="btn btn-sm {% if status_filter == 'confirmed' %}btn-primary{% else %}btn-secondary{% endif %}">Confirmed / Reserved</a>
+      <a href="{{ url_for('donor.donations_list', status='completed') }}" class="btn btn-sm {% if status_filter == 'completed' %}btn-primary{% else %}btn-secondary{% endif %}">Completed</a>
+      <a href="{{ url_for('donor.donations_list', status='expired') }}" class="btn btn-sm {% if status_filter == 'expired' %}btn-primary{% else %}btn-secondary{% endif %}">Expired</a>
+      <a href="{{ url_for('donor.donations_list', status='safety_review') }}" class="btn btn-sm {% if status_filter == 'safety_review' %}btn-primary{% else %}btn-secondary{% endif %}">Safety Review</a>
+    </div>
+
+    <!-- Listings Table -->
+    <div class="card">
+      {% if donations %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Available / Published</th>
+                <th>Storage</th>
+                <th>Collection Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for don in donations %}
+                <tr>
+                  <td>
+                    <strong>{{ don.food_name }}</strong>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">ID: {{ don.id }}</div>
+                  </td>
+                  <td>{{ don.food_category|replace('_', ' ')|capitalize }}</td>
+                  <td>
+                    <span style="font-weight: 700; color: var(--color-primary);">{{ don.quantity_available }}</span> / {{ don.quantity_published }} {{ don.unit }}
+                  </td>
+                  <td>{{ don.storage_conditions|replace('_', ' ')|capitalize }}</td>
+                  <td style="color: var(--color-text-muted);">
+                    {{ don.collection_deadline|replace('T', ' ')[:16] }}
+                  </td>
+                  <td>
+                    {% set status = don.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 4px;">
+                      <a href="{{ url_for('donor.donation_detail', donation_id=don.id) }}" class="btn btn-secondary btn-sm">View</a>
+                      {% if don.status == 'available' and don.quantity_reserved == 0 %}
+                        <a href="{{ url_for('donor.edit_donation', donation_id=don.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; padding: 3rem 1rem;">
+          <p style="color: var(--color-text-muted); margin-bottom: 1rem;">No listings found for this filter criteria.</p>
+          <a href="{{ url_for('donor.create_donation') }}" class="btn btn-primary">+ Create New Donation</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
