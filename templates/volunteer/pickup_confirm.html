@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Pickup — {{ req.id }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 700px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Verify Kitchen Pickup</h1>
+        <p class="page-subtitle">Verify packaging and temperature holding before departing with food cargo.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('volunteer.task_detail', request_id=req.id) }}" class="btn btn-secondary">&larr; Back to Dispatch</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('volunteer.pickup_confirm', request_id=req.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div style="background-color: var(--color-bg-subtle); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--color-border); font-size: 0.9rem;">
+            <div>Food Cargo: <strong>{{ donation.food_name if donation else 'Surplus Food' }}</strong></div>
+            <div>Quantity: <strong>{{ req.quantity_requested }} {{ donation.unit if donation else 'portions' }}</strong></div>
+            <div>Pickup Kitchen: <strong>{{ donation.donor_name if donation else 'Donor' }}</strong></div>
+            <div>Holding Standard: <strong>{{ donation.storage_conditions|replace('_', ' ')|capitalize if donation else 'Chilled' }}</strong></div>
+          </div>
+
+          <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">Mandatory Safety Inspection Checklist</h4>
+
+          <div class="form-check" style="margin-bottom: 0.75rem;">
+            <input type="checkbox" id="chk_temp" name="chk_temp" class="form-check-input" required>
+            <label class="form-check-label" for="chk_temp">
+              I have checked that the food was removed directly from appropriate thermal holding (hot or refrigerated) and is placed immediately into our insulated transport containers.
+            </label>
+          </div>
+
+          <div class="form-check" style="margin-bottom: 0.75rem;">
+            <input type="checkbox" id="chk_pack" name="chk_pack" class="form-check-input" required>
+            <label class="form-check-label" for="chk_pack">
+              I have visually verified packaging is clean, securely covered/sealed, and shows no signs of leakage or cross-contamination.
+            </label>
+          </div>
+
+          <div class="form-check" style="margin-bottom: 1.5rem;">
+            <input type="checkbox" id="chk_label" name="chk_label" class="form-check-input" required>
+            <label class="form-check-label" for="chk_label">
+              Allergen declarations and dish contents are clearly marked on the exterior containers.
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup_notes">Pickup Observations / Notes (Optional)</label>
+            <textarea id="pickup_notes" name="pickup_notes" class="form-control" rows="3" placeholder="e.g. 5 large hotel pans collected; temperature verified at 65°C; packed in insulated catering bags."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Confirm Pickup & Begin Transit &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
