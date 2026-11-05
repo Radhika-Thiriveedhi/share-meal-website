@@ -1,6 +1,9 @@
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from services.request_service import RequestService
 from services.donation_service import DonationService
+from services.audit_service import AuditService
+from services.notification_service import NotificationService
 from storage.json_storage import storage
 from config import Config
 from utils.decorators import login_required, role_required, verified_required
@@ -16,11 +19,9 @@ def dashboard():
     org_id = session.get('user_id')
     my_requests = RequestService.get_organization_requests(org_id)
     
-    # Calculate organization statistics
     total_received = sum(float(r.get('quantity_requested', 0)) for r in my_requests if r.get('status') == 'receipt_confirmed')
     active_requests = [r for r in my_requests if r.get('status') in ['pending', 'approved', 'volunteer_assigned', 'picked_up', 'delivered']]
     
-    # Available donations showcase
     DonationService.sweep_expired_donations()
     available_donations = storage.find_where(Config.DONATIONS_FILE, lambda d: d.get('status') in ['available', 'request_received', 'partially_fulfilled'] and float(d.get('quantity_available', 0)) > 0)
     
@@ -145,6 +146,80 @@ def cancel_request(request_id):
     success, msg = RequestService.cancel_request(request_id, org_id, reason)
     flash(msg, "success" if success else "danger")
     return redirect(url_for('org.requests_list'))
+
+@org_bp.route('/requests/<request_id>/confirm-receipt', methods=['GET', 'POST'])
+@login_required
+@role_required('organization')
+@verified_required
+def confirm_receipt(request_id):
+    """Confirm delivered food arrived in wholesome condition and record receipt."""
+    org_id = session.get('user_id')
+    req = RequestService.get_request_by_id(request_id)
+    if not req or req.get('organization_id') != org_id:
+        flash("Request not found.", "danger")
+        return redirect(url_for('org.requests_list'))
+
+    donation = DonationService.get_donation_by_id(req.get('donation_id'))
+
+    if request.method == 'POST':
+        rating = int(request.form.get('rating', 5))
+        feedback = request.form.get('recipient_feedback', '')
+        now = datetime.utcnow().isoformat()
+        qty = float(req.get('quantity_requested', 0))
+
+        # 1. Update request to receipt_confirmed
+        storage.update(Config.REQUESTS_FILE, request_id, {
+            'status': 'receipt_confirmed',
+            'confirmed_time': now,
+            'rating': rating,
+            'recipient_feedback': feedback.strip()
+        })
+
+        # 2. Update donation: add to distributed, decrement reserved
+        if donation:
+            curr_reserved = max(0.0, float(donation.get('quantity_reserved', 0)) - qty)
+            curr_distributed = float(donation.get('quantity_distributed', 0)) + qty
+            published = float(donation.get('quantity_published', 0))
+            new_available = max(0.0, published - curr_reserved - curr_distributed)
+
+            new_don_status = 'completed' if (new_available == 0 and curr_reserved == 0) else donation.get('status')
+            storage.update(Config.DONATIONS_FILE, donation['id'], {
+                'quantity_reserved': curr_reserved,
+                'quantity_distributed': curr_distributed,
+                'quantity_available': new_available,
+                'status': new_don_status
+            })
+
+            # Notify donor
+            NotificationService.send_notification(
+                user_id=donation['donor_id'],
+                title="Donation Receipt Confirmed!",
+                message=f"{req['organization_name']} verified receipt of {qty} {donation.get('unit')} of '{donation['food_name']}'. Rating: {rating}/5 stars.",
+                notif_type="success",
+                link="/donor/history"
+            )
+
+        # Notify volunteer
+        if req.get('volunteer_id'):
+            NotificationService.send_notification(
+                user_id=req['volunteer_id'],
+                title="Delivery Confirmed by Charity!",
+                message=f"{req['organization_name']} signed off on your delivery of {qty} portions. Thank you for your service!",
+                notif_type="success",
+                link="/volunteer/history"
+            )
+
+        AuditService.log_event(
+            action="CONFIRM_RECEIPT",
+            resource_type="request",
+            resource_id=request_id,
+            details=f"Receipt confirmed for {qty} portions. Rating: {rating}/5. Feedback: {feedback}"
+        )
+
+        flash("Food receipt successfully confirmed. Thank you for closing the food relief loop!", "success")
+        return redirect(url_for('org.history'))
+
+    return render_template('org/confirm_receipt.html', req=req, donation=donation)
 
 @org_bp.route('/history')
 @login_required
