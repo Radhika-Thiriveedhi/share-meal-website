@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile & Account Settings — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 850px;">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Account Settings</h1>
+      <p class="page-subtitle">Manage your organization profile, contact details, and security credentials.</p>
+    </div>
+    <div>
+      {% set status = user.verification_status %}
+      {% include 'components/_badge.html' %}
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Profile Information Form -->
+    <div class="col-8">
+      <div class="card" style="margin-bottom: var(--space-xl);">
+        <div class="card-header">
+          <h3 class="card-title">Profile Information</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('auth.profile') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="update_profile">
+
+            {% if user.role in ['donor', 'organization'] %}
+              <div class="form-group">
+                <label class="form-label" for="org_name">Organization / Business Name</label>
+                <input type="text" id="org_name" name="org_name" class="form-control" value="{{ user.org_name or '' }}" required>
+              </div>
+            {% endif %}
+
+            <div class="row">
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="name">Representative Name</label>
+                  <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="phone">Contact Phone</label>
+                  <input type="tel" id="phone" name="phone" class="form-control" value="{{ user.phone }}" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="address">Street Address</label>
+              <input type="text" id="address" name="address" class="form-control" value="{{ user.address or '' }}" required>
+            </div>
+
+            <div class="row">
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="city">City</label>
+                  <input type="text" id="city" name="city" class="form-control" value="{{ user.city or '' }}" required>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="postal_code">Postal Code</label>
+                  <input type="text" id="postal_code" name="postal_code" class="form-control" value="{{ user.postal_code or '' }}" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="operating_hours">Operating / Availability Hours</label>
+              <input type="text" id="operating_hours" name="operating_hours" class="form-control" value="{{ user.operating_hours or '' }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Profile Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Password Change Form -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Change Password</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('auth.profile') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="form-group">
+              <label class="form-label" for="current_password">Current Password</label>
+              <input type="password" id="current_password" name="current_password" class="form-control" required>
+            </div>
+
+            <div class="row">
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="new_password">New Password</label>
+                  <input type="password" id="new_password" name="new_password" class="form-control" data-validate-strength data-feedback-id="pwd-hint-change" required>
+                  <div id="pwd-hint-change" class="form-hint">8+ chars, upper, lower, & number.</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="confirm_password">Confirm New Password</label>
+                  <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">Update Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Details Sidebar -->
+    <div class="col-4">
+      <div class="card" style="margin-bottom: var(--space-md);">
+        <div class="card-header">
+          <h4 class="card-title">Account Overview</h4>
+        </div>
+        <div class="card-body" style="font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.8;">
+          <div>Role: <strong style="color:var(--color-text-main);">{{ user.role|capitalize }}</strong></div>
+          <div>Email: <strong style="color:var(--color-text-main);">{{ user.email }}</strong></div>
+          {% if user.license_number %}
+            <div>License / Reg #: <strong style="color:var(--color-text-main);">{{ user.license_number }}</strong></div>
+          {% endif %}
+          {% if user.tax_id %}
+            <div>Tax ID: <strong style="color:var(--color-text-main);">{{ user.tax_id }}</strong></div>
+          {% endif %}
+          <div>Member Since: {{ user.created_at[:10] }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
