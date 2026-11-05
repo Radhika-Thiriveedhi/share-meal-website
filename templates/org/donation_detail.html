@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Food — {{ donation.food_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">{{ donation.food_name }}</h1>
+        <p class="page-subtitle">Offered by {{ donation.donor_name }} &bull; Available Qty: {{ donation.quantity_available }} {{ donation.unit }}</p>
+      </div>
+      <div>
+        <a href="{{ url_for('org.browse') }}" class="btn btn-secondary">&larr; Back to Catalog</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Left Column: Food Safety Specifications -->
+      <div class="col-6">
+        <div class="card" style="margin-bottom: var(--space-lg);">
+          <div class="card-header">
+            <h3 class="card-title">Food Safety Declaration</h3>
+          </div>
+          <div class="card-body" style="font-size: 0.9rem; line-height: 1.8;">
+            <div>Category: <strong>{{ donation.food_category|replace('_', ' ')|capitalize }}</strong></div>
+            <div>Prepared: <strong>{{ donation.preparation_datetime|replace('T', ' ')[:16] }}</strong></div>
+            <div>Collection Deadline: <strong style="color:var(--color-warning);">{{ donation.collection_deadline|replace('T', ' ')[:16] }}</strong></div>
+            <div>Storage Holding: <strong>{{ donation.storage_conditions|replace('_', ' ')|capitalize }}</strong></div>
+            <div>Packaging Standard: <strong>{{ donation.packaging_condition|replace('_', ' ')|capitalize }}</strong></div>
+            
+            <div style="margin-top: 0.5rem;">
+              <strong>Allergens Declared:</strong>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                {% for a in donation.allergens %}
+                  <span class="badge badge-info">{{ a }}</span>
+                {% endfor %}
+              </div>
+            </div>
+
+            <hr style="margin: 1rem 0;">
+
+            <div>
+              <strong>Pickup Location:</strong>
+              <div style="color:var(--color-text-muted);">{{ donation.pickup_address }}</div>
+            </div>
+
+            {% if donation.pickup_instructions %}
+              <div style="margin-top: 0.5rem;">
+                <strong>Pickup Instructions:</strong>
+                <div style="color:var(--color-text-muted);">{{ donation.pickup_instructions }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Request Submission Form -->
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Submit Food Request</h3>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="{{ url_for('org.donation_detail', donation_id=donation.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+              <div class="form-group">
+                <label class="form-label" for="quantity_requested">
+                  Quantity Required (Max {{ donation.quantity_available }} {{ donation.unit }}) <span class="required">*</span>
+                </label>
+                <input type="number" step="0.1" min="0.1" max="{{ donation.quantity_available }}" id="quantity_requested" name="quantity_requested" class="form-control" value="{{ donation.quantity_available }}" required>
+                <div class="form-hint">You can request partial quantities based on shelter capacity.</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="urgency">Distribution Urgency <span class="required">*</span></label>
+                <select id="urgency" name="urgency" class="form-control" required>
+                  <option value="normal">Normal Service (Standard schedule)</option>
+                  <option value="urgent">Urgent (Meal service within 4 hours)</option>
+                  <option value="critical">Critical (Immediate shelter emergency need)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="intended_beneficiaries">Target Beneficiaries Description</label>
+                <textarea id="intended_beneficiaries" name="intended_beneficiaries" class="form-control" rows="3" placeholder="e.g. Night shelter residents (approx 35 adults and youths) for dinner service." required></textarea>
+              </div>
+
+              <div class="form-check" style="margin-bottom: 1.5rem;">
+                <input type="checkbox" id="accept_coldchain" name="accept_coldchain" class="form-check-input" required>
+                <label class="form-check-label" for="accept_coldchain" style="font-size: 0.82rem;">
+                  I verify our facility has proper refrigeration/heating to store these items immediately upon receipt.
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                Confirm & Submit Request &rarr;
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
