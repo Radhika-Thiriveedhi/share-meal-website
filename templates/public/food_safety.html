@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Food Safety & Compliance Policy — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 960px;">
+  <div style="margin-bottom: var(--space-2xl); text-align: center;">
+    <span class="badge badge-warning" style="margin-bottom: 0.5rem;">Safety Protocols</span>
+    <h1>Food Safety, Quality Standards & Regulatory Compliance</h1>
+    <p class="lead" style="max-width: 700px; margin: 0 auto;">
+      Surplus food redistribution requires uncompromising adherence to sanitary food handling and thermal cold-chain protocols.
+    </p>
+  </div>
+
+  <div class="food-safety-banner">
+    <strong>Mandatory Platform Disclaimer</strong>
+    ShareMeal operates as a coordination network for verified commercial food handlers and charities. Food is never assumed safe simply based on self-declaration. All participants are required to perform physical inspections, verify temperature thresholds, and immediately flag deviations.
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl);">
+    <div class="card-header">
+      <h3 class="card-title">1. Thermal Holding Standards (The Danger Zone)</h3>
+    </div>
+    <div class="card-body">
+      <p>
+        The microbiological "Danger Zone" occurs between <strong>4°C and 60°C (40°F to 140°F)</strong>, where pathogenic bacteria replicate rapidly. All ShareMeal donations must satisfy the following criteria:
+      </p>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Food Category</th>
+              <th>Required Holding Condition</th>
+              <th>Temperature Threshold</th>
+              <th>Maximum Collection Window</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hot-Held Cooked Meals</strong></td>
+              <td>Maintained hot in insulated commercial carriers</td>
+              <td>&ge; 60°C (140°F)</td>
+              <td>Maximum 4 hours from prep</td>
+            </tr>
+            <tr>
+              <td><strong>Chilled / Refrigerated Goods</strong></td>
+              <td>Refrigerated within 2 hours of prep</td>
+              <td>&le; 4°C (40°F)</td>
+              <td>Maximum 48 hours from prep</td>
+            </tr>
+            <tr>
+              <td><strong>Frozen Surplus Food</strong></td>
+              <td>Kept solidly frozen in deep freezers</td>
+              <td>&le; -18°C (0°F)</td>
+              <td>Up to 30 days if labeled</td>
+            </tr>
+            <tr>
+              <td><strong>Bakery & Dry Goods</strong></td>
+              <td>Dry, ventilated room temperature</td>
+              <td>15°C - 22°C (60°F - 72°F)</td>
+              <td>Maximum 36 hours from bake</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom: var(--space-xl);">
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-header">
+          <h4 class="card-title">2. Mandatory Allergen Labeling</h4>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            Donors must explicitly declare the presence or absence of major food allergens:
+          </p>
+          <ul style="font-size: 0.88rem; color: var(--color-text-muted); margin-left: 1.2rem; line-height: 1.6;">
+            <li>Wheat & Gluten</li>
+            <li>Milk & Dairy Products</li>
+            <li>Eggs & Egg Products</li>
+            <li>Peanuts & Tree Nuts</li>
+            <li>Fish & Crustacean Shellfish</li>
+            <li>Soybeans & Sesame</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-header">
+          <h4 class="card-title">3. Packaging Integrity Criteria</h4>
+        </div>
+        <div class="card-body">
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            Food will be rejected at pickup if packaging exhibits any of the following hazards:
+          </p>
+          <ul style="font-size: 0.88rem; color: var(--color-text-muted); margin-left: 1.2rem; line-height: 1.6;">
+            <li>Torn plastic seals or punctured barrier bags</li>
+            <li>Swollen, dented, or leaking cans</li>
+            <li>Non-food-grade containers (e.g. trash bags)</li>
+            <li>Unlabeled multi-ingredient prepared pans</li>
+            <li>Signs of pest intrusion or water staining</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl);">
+    <div class="card-header">
+      <h3 class="card-title">4. Immediate Safety Quarantine Mechanism</h3>
+    </div>
+    <div class="card-body">
+      <p>
+        Any receiving organization, volunteer, or donor supervisor who identifies a safety defect (e.g., inadequate temperature, packaging leak, off-odor) can trigger an instant <strong>Safety Incident Report</strong> directly from their dashboard.
+      </p>
+      <div class="alert alert-warning" style="margin: 1rem 0;">
+        <span><strong>Quarantine Effect:</strong> Submitting a safety report automatically shifts the listing to <code>Safety Review</code>, cancels pending volunteer dispatches, and blocks any further distribution until a designated Administrator completes an audit.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">5. Good Samaritan Legal Framework</h3>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+        Under national food donation legislation (such as the Bill Emerson Good Samaritan Food Donation Act and applicable provincial/state counterparts), commercial entities and non-profit distributors that donate wholesome food in good faith are shielded from civil and criminal liability arising from the nature, age, packaging, or condition of the donated food, provided there is no gross negligence or intentional misconduct.
+      </p>
+      <p style="font-size: 0.88rem; color: var(--color-text-muted); margin-bottom: 0;">
+        For questions or inspection audits, contact the ShareMeal Food Safety Compliance Board at <code>safety@sharemeal.org</code>.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
