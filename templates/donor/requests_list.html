@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Incoming Requests — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Incoming Organization Requests</h1>
+        <p class="page-subtitle">Review charity requests, approve portion reservations, and initiate volunteer dispatch.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      {% if requests %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Food Item</th>
+                <th>Requesting Charity</th>
+                <th>Requested Qty</th>
+                <th>Urgency</th>
+                <th>Intended Beneficiaries</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requests %}
+                <tr>
+                  <td>
+                    <strong>{{ req.food_name or 'Surplus Item' }}</strong>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Request ID: {{ req.id }}</div>
+                  </td>
+                  <td>
+                    <strong>{{ req.organization_name }}</strong>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Contact: {{ req.organization_contact }}</div>
+                  </td>
+                  <td>
+                    <span style="font-weight: 700; color: var(--color-primary);">{{ req.quantity_requested }}</span> {{ req.unit or 'portions' }}
+                  </td>
+                  <td>
+                    <span class="badge {% if req.urgency == 'critical' %}badge-danger{% elif req.urgency == 'urgent' %}badge-warning{% else %}badge-info{% endif %}">
+                      {{ req.urgency|capitalize }}
+                    </span>
+                  </td>
+                  <td style="max-width: 200px; font-size: 0.85rem; color: var(--color-text-muted);">
+                    {{ req.intended_beneficiaries or 'Community dining service' }}
+                  </td>
+                  <td>
+                    {% set status = req.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                  <td>
+                    {% if req.status == 'pending' %}
+                      <div style="display: flex; gap: 4px;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openApproveModal('{{ req.id }}', '{{ req.organization_name }}', '{{ req.quantity_requested }}', '{{ req.food_name }}')">
+                          Approve
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openRejectModal('{{ req.id }}', '{{ req.organization_name }}')">
+                          Decline
+                        </button>
+                      </div>
+                    {% elif req.status == 'approved' %}
+                      <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 600;">Dispatched to Volunteers</span>
+                    {% elif req.status == 'volunteer_assigned' %}
+                      <span style="font-size: 0.8rem; color: var(--color-text-main);">Courier: {{ req.volunteer_name }}</span>
+                    {% elif req.status == 'receipt_confirmed' %}
+                      <span style="font-size: 0.8rem; color: var(--color-success); font-weight: 600;">Handoff Confirmed</span>
+                    {% else %}
+                      <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{ req.status|replace('_', ' ')|capitalize }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+          No requests received from charities at this time.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Approve & Reject Modals -->
+{% include 'donor/request_review_modal.html' %}
+{% include 'donor/reject_modal.html' %}
+
+<script>
+function openApproveModal(id, org, qty, food) {
+  document.getElementById('approve_form').action = '/donor/requests/' + id + '/approve';
+  document.getElementById('approve_org').textContent = org;
+  document.getElementById('approve_qty').textContent = qty;
+  document.getElementById('approve_food').textContent = food;
+  openModal('approveModal');
+}
+
+function openRejectModal(id, org) {
+  document.getElementById('reject_form').action = '/donor/requests/' + id + '/reject';
+  document.getElementById('reject_org').textContent = org;
+  openModal('rejectModal');
+}
+</script>
+{% endblock %}
