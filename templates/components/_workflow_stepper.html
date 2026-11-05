@@ -1,0 +1,38 @@
+{# Reusable Workflow Stepper Component
+   Inputs:
+   current_status: (e.g. 'available', 'request_received', 'confirmed', 'volunteer_assigned', 'picked_up', 'delivered', 'receipt_confirmed', 'completed', 'safety_review', 'expired', 'cancelled')
+#}
+{% set steps = [
+  ('available', 'Available'),
+  ('request_received', 'Request Sent'),
+  ('confirmed', 'Confirmed'),
+  ('volunteer_assigned', 'Courier Assigned'),
+  ('picked_up', 'Picked Up'),
+  ('delivered', 'Delivered'),
+  ('receipt_confirmed', 'Receipt Confirmed')
+] %}
+
+{% set status_order = {
+  'available': 1,
+  'request_received': 2,
+  'confirmed': 3,
+  'partially_fulfilled': 3,
+  'approved': 3,
+  'volunteer_assigned': 4,
+  'picked_up': 5,
+  'delivered': 6,
+  'receipt_confirmed': 7,
+  'completed': 7
+} %}
+
+{% set current_order = status_order.get(current_status, 1) %}
+
+<div class="workflow-stepper">
+  {% for key, label in steps %}
+    {% set step_num = loop.index %}
+    <div class="step-item {% if current_status in ['cancelled', 'expired'] and step_num >= current_order %}danger{% elif current_order >= step_num %}active{% elif current_order == step_num %}active{% endif %}">
+      <div class="step-circle">{{ step_num }}</div>
+      <div class="step-label">{{ label }}</div>
+    </div>
+  {% endfor %}
+</div>
