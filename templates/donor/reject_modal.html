@@ -1,0 +1,34 @@
+<!-- Decline Request Modal -->
+<div id="rejectModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color: var(--color-warning);">Decline Food Request</h4>
+      <button type="button" class="modal-close" onclick="closeModal('rejectModal')">&times;</button>
+    </div>
+    <form id="reject_form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="modal-body">
+        <p style="font-size: 0.92rem; color: var(--color-text-main);">
+          Please specify a reason for declining the request from <strong id="reject_org"></strong>.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="decline_reason">Reason for Decline <span class="required">*</span></label>
+          <select id="decline_reason" name="reason" class="form-control" required>
+            <option value="Quantity already committed to priority local shelter">Quantity already committed to priority local shelter</option>
+            <option value="Packaging batch depleted / unable to repackage">Packaging batch depleted / unable to repackage</option>
+            <option value="Kitchen closing earlier than anticipated">Kitchen closing earlier than anticipated</option>
+            <option value="Holding temperature fell below standard prior to confirmation">Holding temperature fell below standard prior to confirmation</option>
+            <option value="Other operational constraint">Other operational constraint</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('rejectModal')">Cancel</button>
+        <button type="submit" class="btn btn-warning">Decline Request</button>
+      </div>
+    </form>
+  </div>
+</div>
