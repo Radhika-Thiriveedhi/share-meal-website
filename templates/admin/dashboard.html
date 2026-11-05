@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Control Center — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Platform Administration & Governance</h1>
+        <p class="page-subtitle">Platform health, entity compliance, and food rescue operations across Metropolis.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <form method="POST" action="{{ url_for('admin.create_backup') }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-secondary btn-sm">Create Snapshot Backup</button>
+        </form>
+        <a href="{{ url_for('admin.verifications') }}" class="btn btn-primary btn-sm">Review Verifications ({{ pending_verifications_count }}) &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Alert Banner if Safety Reports Pending -->
+    {% if active_reports_count > 0 %}
+      <div class="alert alert-danger" style="margin-bottom: var(--space-xl);">
+        <div>
+          <strong>Food Safety Alert:</strong> There are <strong>{{ active_reports_count }} active safety report(s)</strong> requiring audit determination.
+        </div>
+        <a href="{{ url_for('admin.safety_reports') }}" class="btn btn-danger btn-sm" style="margin-left: 1rem;">Open Safety Board &rarr;</a>
+      </div>
+    {% endif %}
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card warning">
+        <div class="stat-label">Pending Verifications</div>
+        <div class="stat-value">{{ pending_verifications_count }}</div>
+        <div class="stat-meta">Accounts awaiting document review</div>
+      </div>
+
+      <div class="stat-card primary">
+        <div class="stat-label">Total Rescued Food</div>
+        <div class="stat-value">{{ total_distributed|int }}</div>
+        <div class="stat-meta">Verified distributed portions / kg</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Active Dispatches</div>
+        <div class="stat-value">{{ active_dispatches_count }}</div>
+        <div class="stat-meta">Missions currently on the road</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Registered Entities</div>
+        <div class="stat-value">{{ total_users_count }}</div>
+        <div class="stat-meta">Donors, charities, couriers, admins</div>
+      </div>
+    </div>
+
+    <!-- Pending Verification Queue -->
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-header">
+        <h3 class="card-title">Pending Account Verifications</h3>
+        <a href="{{ url_for('admin.verifications') }}" class="btn btn-secondary btn-sm">View Verification Queue &rarr;</a>
+      </div>
+      {% if pending_users %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Organization / Name</th>
+                <th>Role</th>
+                <th>License / Reg ID</th>
+                <th>City</th>
+                <th>Submitted Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in pending_users %}
+                <tr>
+                  <td>
+                    <strong>{{ u.org_name or u.name }}</strong>
+                    <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ u.email }}</div>
+                  </td>
+                  <td>
+                    <span class="badge badge-info">{{ u.role|capitalize }}</span>
+                  </td>
+                  <td><code>{{ u.license_number or 'Pending ID' }}</code></td>
+                  <td>{{ u.city }}</td>
+                  <td style="color:var(--color-text-muted);">{{ u.created_at[:10] }}</td>
+                  <td>
+                    <div style="display: flex; gap: 4px;">
+                      <form method="POST" action="{{ url_for('admin.approve_verification', user_id=u.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                      </form>
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="openRejectModal('{{ u.id }}', '{{ u.name }}')">Reject</button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+          No pending account verifications. All registrations are up to date.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Quick Navigation Panels -->
+    <div class="row">
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">System Operations</h4>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <a href="{{ url_for('admin.donations') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>Platform Donations Monitor</span> &rarr;
+            </a>
+            <a href="{{ url_for('admin.requests') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>Network Dispatches & Requests</span> &rarr;
+            </a>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>Manage User Directory & Status</span> &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Security & Data Governance</h4>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <a href="{{ url_for('admin.safety_reports') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>Food Safety Incident Registry</span> &rarr;
+            </a>
+            <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>Security & Operational Audit Trail</span> &rarr;
+            </a>
+            <a href="{{ url_for('admin.backups') }}" class="btn btn-outline" style="justify-content: space-between;">
+              <span>JSON Database Snapshot Archives</span> &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for rejecting verification -->
+<div id="rejectVerifModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color:var(--color-danger);">Reject Registration</h4>
+      <button type="button" class="modal-close" onclick="closeModal('rejectVerifModal')">&times;</button>
+    </div>
+    <form id="reject_verif_form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-body">
+        <p>Please enter rejection reason for <strong id="reject_user_name"></strong>:</p>
+        <textarea name="reason" class="form-control" rows="3" placeholder="e.g. Invalid health permit number or unverifiable 501(c)(3) registration." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('rejectVerifModal')">Cancel</button>
+        <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openRejectModal(userId, name) {
+  document.getElementById('reject_verif_form').action = '/admin/verifications/' + userId + '/reject';
+  document.getElementById('reject_user_name').textContent = name;
+  openModal('rejectVerifModal');
+}
+</script>
+{% endblock %}
