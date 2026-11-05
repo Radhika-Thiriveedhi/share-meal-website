@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Food Safety Issue / Delay — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 700px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Report Safety Hazard / Delay</h1>
+        <p class="page-subtitle">File an urgent incident report to protect community health and shelter safety.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('volunteer.task_detail', request_id=req.id) }}" class="btn btn-secondary">&larr; Back to Dispatch</a>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--color-warning);">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('volunteer.report_issue', request_id=req.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div style="background-color: var(--color-warning-light); padding: 0.85rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.88rem; color: #78350F; border: 1px solid var(--color-warning-border);">
+            <strong>Quarantine Protocol:</strong> Submitting this report immediately shifts listing <strong>{{ donation.food_name if donation else 'Food Item' }}</strong> into <code>Safety Review</code> quarantine and alerts platform administrators.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="issue_type">Hazard / Delay Category <span class="required">*</span></label>
+            <select id="issue_type" name="issue_type" class="form-control" required>
+              <option value="">Select hazard category...</option>
+              <option value="temperature_abuse">Temperature Abuse (Holding threshold not maintained)</option>
+              <option value="broken_packaging">Packaging Failure (Torn seal, leakage, punctured lid)</option>
+              <option value="spoiled_food">Sensory Defect (Unpleasant odor, discoloration, mold)</option>
+              <option value="allergen_mislabel">Allergen Mislabeling / Cross-Contact Hazard</option>
+              <option value="delay_spoilage">Severe Transit Delay (Exceeded thermal safe window)</option>
+              <option value="sanitation_hazard">Sanitation Hazard at Pickup / Storage Location</option>
+              <option value="other">Other Food Quality Concern</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="description">Detailed Incident Description & Temperature Reading <span class="required">*</span></label>
+            <textarea id="description" name="description" class="form-control" rows="5" placeholder="Specify observations, measured temperature (if probe available), packaging condition, and corrective actions taken." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-danger btn-block" style="margin-top: 1.5rem;">
+            Submit Report & Freeze Food Listing &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
