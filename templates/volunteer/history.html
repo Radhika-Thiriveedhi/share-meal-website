@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Volunteer Completed Missions — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Volunteer Impact Record</h1>
+        <p class="page-subtitle">Historical log of all surplus collections completed and delivered to community relief kitchens.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-secondary">&larr; Back to Operations Hub</a>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: var(--space-xl);">
+      <div class="stat-card primary">
+        <div class="stat-label">Total Missions Completed</div>
+        <div class="stat-value">{{ completed_missions|length }}</div>
+        <div class="stat-meta">Verified deliveries to community shelters</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Volunteer Standing</div>
+        <div class="stat-value" style="font-size: 1.5rem; color: var(--color-primary);">Active Courier</div>
+        <div class="stat-meta">In good standing with food safety board</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Completed Delivery Log</h3>
+      </div>
+      {% if completed_missions %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mission ID</th>
+                <th>Charity Destination</th>
+                <th>Quantity</th>
+                <th>Delivered Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in completed_missions %}
+                <tr>
+                  <td><code>{{ m.id }}</code></td>
+                  <td><strong>{{ m.organization_name }}</strong></td>
+                  <td>{{ m.quantity_requested }} portions</td>
+                  <td style="color:var(--color-text-muted);">{{ (m.delivered_time or m.updated_at)[:16]|replace('T', ' ') }}</td>
+                  <td>
+                    {% set status = m.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('volunteer.task_detail', request_id=m.id) }}" class="btn btn-secondary btn-sm">Inspect Record</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 3rem 1rem;">
+          You have not completed any collection deliveries yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
