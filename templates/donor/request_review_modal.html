@@ -1,0 +1,32 @@
+<!-- Approve Request Confirmation Modal -->
+<div id="approveModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color: var(--color-primary);">Confirm Food Reservation</h4>
+      <button type="button" class="modal-close" onclick="closeModal('approveModal')">&times;</button>
+    </div>
+    <form id="approve_form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="modal-body">
+        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--color-text-main);">
+          You are approving the request from <strong id="approve_org"></strong> for <strong id="approve_qty" style="color:var(--color-primary);"></strong> portions of <strong id="approve_food"></strong>.
+        </p>
+
+        <div style="background-color: var(--color-bg-subtle); border-radius: var(--radius-md); padding: 0.85rem; margin: 1rem 0; border: 1px solid var(--color-border); font-size: 0.85rem; color: var(--color-text-muted);">
+          <strong>What happens upon approval?</strong>
+          <ul style="margin-left: 1.2rem; margin-top: 0.25rem; line-height: 1.5;">
+            <li>The requested quantity is reserved atomically to prevent double allocation.</li>
+            <li>A dispatch notification is transmitted to active community volunteers.</li>
+            <li>The requesting organization is alerted that food is preparing for pickup.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('approveModal')">Review Later</button>
+        <button type="submit" class="btn btn-primary">Approve & Reserve Portions &rarr;</button>
+      </div>
+    </form>
+  </div>
+</div>
