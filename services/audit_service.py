@@ -1,4 +1,4 @@
-from flask import request, session
+from flask import has_request_context, request, session
 from storage.json_storage import storage
 from storage.models import AuditLogModel
 from config import Config
@@ -6,15 +6,17 @@ from config import Config
 class AuditService:
     @staticmethod
     def log_event(action, resource_type, resource_id="", details="", user_id=None, user_email=None, user_role=None):
-        """Record an operational or security audit log."""
-        try:
-            ip = request.remote_addr if request else "127.0.0.1"
-        except RuntimeError:
+        """Record an operational or security audit log safely handling test and CLI environments."""
+        if has_request_context():
+            ip = request.remote_addr if request.remote_addr else "127.0.0.1"
+            uid = user_id or session.get("user_id", "anonymous")
+            email = user_email or session.get("email", "anonymous")
+            role = user_role or session.get("role", "guest")
+        else:
             ip = "127.0.0.1"
-
-        uid = user_id or session.get("user_id", "anonymous")
-        email = user_email or session.get("email", "anonymous")
-        role = user_role or session.get("role", "guest")
+            uid = user_id or "system"
+            email = user_email or "system"
+            role = user_role or "system"
 
         log_entry = AuditLogModel.create(
             user_id=uid,
