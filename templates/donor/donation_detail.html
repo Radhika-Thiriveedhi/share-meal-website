@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ donation.food_name }} — Donation Details{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <h1 class="page-title" style="margin: 0;">{{ donation.food_name }}</h1>
+          {% set status = donation.status %}
+          {% include 'components/_badge.html' %}
+        </div>
+        <p class="page-subtitle">Listing ID: {{ donation.id }} &bull; Published {{ donation.created_at[:16]|replace('T', ' ') }}</p>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        {% if donation.status == 'available' and donation.quantity_reserved == 0 %}
+          <a href="{{ url_for('donor.edit_donation', donation_id=donation.id) }}" class="btn btn-outline">Edit Listing</a>
+        {% endif %}
+        {% if donation.status in ['available', 'request_received', 'confirmed', 'partially_fulfilled'] %}
+          <button type="button" class="btn btn-danger" onclick="openModal('cancelModal')">Cancel Listing</button>
+        {% endif %}
+        <a href="{{ url_for('donor.donations_list') }}" class="btn btn-secondary">&larr; Back to Listings</a>
+      </div>
+    </div>
+
+    <!-- Safety Quarantine Notice if applicable -->
+    {% if donation.status == 'safety_review' %}
+      <div class="alert alert-danger" style="margin-bottom: var(--space-xl);">
+        <div>
+          <strong>Under Food Safety Investigation:</strong> This listing has been quarantined following an incident report.
+          {% if donation.safety_review_reason %}
+            <div style="margin-top: 4px;">Reason: {{ donation.safety_review_reason }}</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Inventory Allocation Card -->
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-header">
+        <h3 class="card-title">Inventory Allocation</h3>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid" style="margin-bottom: 1rem;">
+          <div class="stat-card">
+            <div class="stat-label">Published Quantity</div>
+            <div class="stat-value">{{ donation.quantity_published }} {{ donation.unit }}</div>
+          </div>
+          <div class="stat-card primary">
+            <div class="stat-label">Available for Request</div>
+            <div class="stat-value">{{ donation.quantity_available }} {{ donation.unit }}</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="stat-label">Reserved (Approved)</div>
+            <div class="stat-value">{{ donation.quantity_reserved }} {{ donation.unit }}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Distributed & Received</div>
+            <div class="stat-value">{{ donation.quantity_distributed }} {{ donation.unit }}</div>
+          </div>
+        </div>
+
+        <div class="qty-distribution-bar">
+          <div class="qty-segment-distributed" style="width: {{ (donation.quantity_distributed / donation.quantity_published * 100)|round }}%;"></div>
+          <div class="qty-segment-reserved" style="width: {{ (donation.quantity_reserved / donation.quantity_published * 100)|round }}%;"></div>
+          <div class="qty-segment-available" style="width: {{ (donation.quantity_available / donation.quantity_published * 100)|round }}%;"></div>
+        </div>
+        <div class="qty-legend">
+          <div class="qty-legend-item"><span class="legend-dot" style="background:var(--color-primary);"></span> Distributed</div>
+          <div class="qty-legend-item"><span class="legend-dot" style="background:var(--color-warning);"></span> Reserved</div>
+          <div class="qty-legend-item"><span class="legend-dot" style="background:#CBD5E1;"></span> Available</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Food Safety Specs & Logistics -->
+    <div class="row" style="margin-bottom: var(--space-xl);">
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Food Safety Specifications</h4>
+          </div>
+          <div class="card-body" style="font-size: 0.9rem; line-height: 1.8;">
+            <div>Category: <strong>{{ donation.food_category|replace('_', ' ')|capitalize }}</strong></div>
+            <div>Prepared At: <strong>{{ donation.preparation_datetime|replace('T', ' ')[:16] }}</strong></div>
+            <div>Collection Deadline: <strong style="color:var(--color-warning);">{{ donation.collection_deadline|replace('T', ' ')[:16] }}</strong></div>
+            <div>Storage Required: <strong>{{ donation.storage_conditions|replace('_', ' ')|capitalize }}</strong></div>
+            <div>Packaging: <strong>{{ donation.packaging_condition|replace('_', ' ')|capitalize }}</strong></div>
+            <div style="margin-top: 0.5rem;">
+              Allergens Declared:
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                {% for a in donation.allergens %}
+                  <span class="badge badge-info" style="font-size: 0.75rem;">{{ a }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Pickup & Logistics</h4>
+          </div>
+          <div class="card-body" style="font-size: 0.9rem; line-height: 1.8;">
+            <div>Pickup Address: <strong>{{ donation.pickup_address }}</strong></div>
+            <div>Donor Phone: <strong>{{ donation.donor_phone }}</strong></div>
+            <div style="margin-top: 0.5rem;">
+              <strong>Pickup Instructions:</strong>
+              <p style="color:var(--color-text-muted); margin: 0;">{{ donation.pickup_instructions or 'Standard dock pickup.' }}</p>
+            </div>
+            {% if donation.special_handling_notes %}
+              <div style="margin-top: 0.5rem;">
+                <strong>Special Handling:</strong>
+                <p style="color:var(--color-text-muted); margin: 0;">{{ donation.special_handling_notes }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Associated Requests -->
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Charity Requests for This Donation</h4>
+      </div>
+      {% if requests %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Requesting Organization</th>
+                <th>Requested Qty</th>
+                <th>Target Beneficiaries</th>
+                <th>Volunteer Assigned</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requests %}
+                <tr>
+                  <td><strong>{{ req.organization_name }}</strong></td>
+                  <td>{{ req.quantity_requested }} {{ donation.unit }}</td>
+                  <td>{{ req.intended_beneficiaries or 'Community dining' }}</td>
+                  <td>{{ req.volunteer_name or 'Unassigned' }}</td>
+                  <td>
+                    {% set status = req.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 2rem;">
+          No requests received for this listing yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Donation Modal -->
+{% include 'donor/cancel_modal.html' %}
+{% endblock %}
