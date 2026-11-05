@@ -21,7 +21,7 @@ class RequestService:
         if not donation:
             return False, "Donation listing not found.", None
 
-        if donation.get("status") != "available" and donation.get("status") != "request_received" and donation.get("status") != "partially_fulfilled":
+        if donation.get("status") not in ["available", "request_received", "partially_fulfilled"]:
             return False, f"This donation is currently '{donation.get('status')}' and cannot accept requests.", None
 
         if is_expired(donation.get("collection_deadline")):
@@ -74,6 +74,123 @@ class RequestService:
         )
 
         return True, "Food request submitted successfully. Awaiting donor confirmation.", req
+
+    @staticmethod
+    def approve_request(request_id, donor_id):
+        """
+        Donor approves a charity request.
+        Strictly reserves the food quantity:
+        new_reserved = quantity_reserved + requested_qty
+        new_available = quantity_published - new_reserved - quantity_distributed
+        Prevents over-reservation.
+        Transitions request status to 'approved' and donation status to 'confirmed' (or 'partially_fulfilled' if available remains).
+        Dispatches notification to active volunteers that a collection task is ready.
+        """
+        req = storage.find_by_id(Config.REQUESTS_FILE, request_id)
+        if not req or req.get("status") != "pending":
+            return False, "Request not found or not in pending state."
+
+        donation = storage.find_by_id(Config.DONATIONS_FILE, req.get("donation_id"))
+        if not donation or donation.get("donor_id") != donor_id:
+            return False, "Associated donation not found or unauthorized."
+
+        qty = float(req.get("quantity_requested", 0))
+        available = float(donation.get("quantity_available", 0))
+
+        if qty > available:
+            return False, f"Cannot approve: requested quantity ({qty}) exceeds remaining available inventory ({available})."
+
+        published = float(donation.get("quantity_published", 0))
+        curr_reserved = float(donation.get("quantity_reserved", 0))
+        curr_distributed = float(donation.get("quantity_distributed", 0))
+
+        new_reserved = curr_reserved + qty
+        new_available = max(0.0, published - new_reserved - curr_distributed)
+
+        # Determine donation status
+        new_donation_status = "confirmed" if new_available == 0 else "partially_fulfilled"
+
+        # Update donation record
+        storage.update(Config.DONATIONS_FILE, donation["id"], {
+            "quantity_reserved": new_reserved,
+            "quantity_available": new_available,
+            "status": new_donation_status
+        })
+
+        # Update request record
+        storage.update(Config.REQUESTS_FILE, request_id, {
+            "status": "approved"
+        })
+
+        AuditService.log_event(
+            action="APPROVE_REQUEST",
+            resource_type="request",
+            resource_id=request_id,
+            details=f"Approved request from {req['organization_name']} for {qty} {donation['unit']} (Reserved: {new_reserved}, Available: {new_available})"
+        )
+
+        # Notify requesting organization
+        NotificationService.send_notification(
+            user_id=req["organization_id"],
+            title="Food Request Approved!",
+            message=f"{donation['donor_name']} approved your request for {qty} {donation['unit']} of '{donation['food_name']}'. Volunteer dispatch initiated.",
+            notif_type="success",
+            link="/org/requests"
+        )
+
+        # Notify volunteers of available collection dispatch
+        NotificationService.notify_role(
+            role="volunteer",
+            title="New Collection Mission Available",
+            message=f"Pickup mission available: {qty} {donation['unit']} from {donation['donor_name']} for {req['organization_name']}.",
+            notif_type="info",
+            link="/volunteer/tasks"
+        )
+
+        return True, "Request approved. Quantity reserved and dispatched to volunteer network."
+
+    @staticmethod
+    def reject_request(request_id, donor_id, rejection_reason="Unavailable at this time"):
+        """
+        Donor rejects a charity request.
+        Request transitions to 'rejected'.
+        Recalculates donation status: if no other pending/reserved requests exist, returns to 'available'.
+        """
+        req = storage.find_by_id(Config.REQUESTS_FILE, request_id)
+        if not req or req.get("status") != "pending":
+            return False, "Request not found or not in pending state."
+
+        donation = storage.find_by_id(Config.DONATIONS_FILE, req.get("donation_id"))
+        if not donation or donation.get("donor_id") != donor_id:
+            return False, "Associated donation not found or unauthorized."
+
+        storage.update(Config.REQUESTS_FILE, request_id, {
+            "status": "rejected",
+            "rejection_reason": rejection_reason
+        })
+
+        # Check if other pending requests exist for this donation
+        other_requests = storage.find_where(Config.REQUESTS_FILE, lambda r: r.get("donation_id") == donation["id"] and r.get("status") in ["pending", "approved"])
+        if not other_requests and donation.get("status") == "request_received":
+            storage.update(Config.DONATIONS_FILE, donation["id"], {"status": "available"})
+
+        AuditService.log_event(
+            action="REJECT_REQUEST",
+            resource_type="request",
+            resource_id=request_id,
+            details=f"Rejected request from {req['organization_name']}: {rejection_reason}"
+        )
+
+        # Notify requesting organization
+        NotificationService.send_notification(
+            user_id=req["organization_id"],
+            title="Food Request Declined",
+            message=f"{donation['donor_name']} was unable to fulfill your request: {rejection_reason}",
+            notif_type="warning",
+            link="/org/requests"
+        )
+
+        return True, "Request rejected."
 
     @staticmethod
     def get_organization_requests(org_id):
