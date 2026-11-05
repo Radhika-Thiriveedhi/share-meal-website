@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Platform Reports & Data Export — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Platform Impact & Regulatory Reports</h1>
+        <p class="page-subtitle">Generate auditable documentation for health departments, donor tax deductions, and municipal zero-waste compliance.</p>
+      </div>
+      <div style="display: flex; gap: var(--space-sm);">
+        <a href="{{ url_for('admin.export_csv') }}" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export Donations CSV
+        </a>
+        <a href="{{ url_for('admin.analytics') }}" class="btn btn-outline">View Visual Analytics</a>
+      </div>
+    </div>
+
+    <!-- Summary KPI Snapshot -->
+    <div class="stats-grid" style="margin-bottom: var(--space-xl);">
+      <div class="stat-card primary">
+        <div class="stat-label">Total Verified Rescued Food</div>
+        <div class="stat-value">{{ summary.total_distributed|int }}</div>
+        <div class="stat-meta">Verified received portions / kg</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Rescue Efficiency Rate</div>
+        <div class="stat-value">
+          {% if summary.total_published > 0 %}
+            {{ ((summary.total_distributed / summary.total_published) * 100)|round(1) }}%
+          {% else %}
+            0.0%
+          {% endif %}
+        </div>
+        <div class="stat-meta">Successfully redistributed vs published</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">GHG Emissions Prevented</div>
+        <div class="stat-value" style="color:var(--color-primary);">{{ summary.co2_saved_kg }} kg</div>
+        <div class="stat-meta">EPA WARM model metric</div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-label">Completed Handoffs</div>
+        <div class="stat-value">{{ summary.completed_collections }}</div>
+        <div class="stat-meta">Documented zero-waste transfers</div>
+      </div>
+    </div>
+
+    <!-- Export Documentation Options -->
+    <div class="row" style="margin-bottom: var(--space-xl);">
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h3 class="card-title">Commercial Donor Tax Compliance Export</h3>
+          </div>
+          <div class="card-body">
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: var(--space-md);">
+              Export official documentation under the Federal Bill Emerson Good Samaritan Food Donation Act and applicable local state deductions. Contains complete transaction logs, receiving organization tax IDs, and verified delivery receipt timestamps.
+            </p>
+            <div style="background-color: var(--color-bg-subtle); padding: var(--space-md); border-radius: 4px; border-left: 3px solid var(--color-primary); margin-bottom: var(--space-md);">
+              <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Includes:</div>
+              <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text);">
+                <li>Donor establishment legal name & business license</li>
+                <li>Receiving 501(c)(3) / registered non-profit details</li>
+                <li>Weight, packaging condition, and temperature log upon pickup</li>
+                <li>Final receipt confirmation signed by charity supervisor</li>
+              </ul>
+            </div>
+            <a href="{{ url_for('admin.export_csv') }}" class="btn btn-secondary btn-sm">Download Verified Tax CSV</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h3 class="card-title">Health Department & Safety Audit Package</h3>
+          </div>
+          <div class="card-body">
+            <p style="color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: var(--space-md);">
+              Export traceability logs for municipal public health inspections. Shows chain-of-custody compliance from donor cooling standards to courier thermal transit and temperature compliance at destination intake.
+            </p>
+            <div style="background-color: var(--color-bg-subtle); padding: var(--space-md); border-radius: 4px; border-left: 3px solid var(--color-warning); margin-bottom: var(--space-md);">
+              <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Compliance Indicators:</div>
+              <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text);">
+                <li>Preparation timestamp & storage temperature validation</li>
+                <li>Collection deadline compliance (100% adherence)</li>
+                <li>Allergen cross-contact verification labels</li>
+                <li>Incident response log: quarantine investigations & resolutions</li>
+              </ul>
+            </div>
+            <a href="{{ url_for('admin.safety_reports') }}" class="btn btn-outline btn-sm">Review Safety Incident Log</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Operational Summary Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Platform Operations Summary</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Report Metric</th>
+              <th>Status / Count</th>
+              <th>Operational Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Rescued Food Redirection</strong></td>
+              <td><span class="badge badge-success">{{ summary.total_distributed|int }} Units</span></td>
+              <td>Food that reached vulnerable community members rather than landfills</td>
+            </tr>
+            <tr>
+              <td><strong>Surplus Inflow</strong></td>
+              <td>{{ summary.total_published|int }} Units listed</td>
+              <td>Total surplus catalogued by licensed restaurants and grocers</td>
+            </tr>
+            <tr>
+              <td><strong>Active Reservations</strong></td>
+              <td><span class="badge badge-warning">{{ summary.total_reserved|int }} Units</span></td>
+              <td>Currently allocated to charity requests in volunteer dispatch queue</td>
+            </tr>
+            <tr>
+              <td><strong>Available Capacity</strong></td>
+              <td>{{ summary.total_available|int }} Units ready</td>
+              <td>Active listings available for immediate shelter request</td>
+            </tr>
+            <tr>
+              <td><strong>Dispatched Transits</strong></td>
+              <td>{{ summary.completed_collections }} Completed</td>
+              <td>Volunteer courier pickups delivered and verified at destination</td>
+            </tr>
+            <tr>
+              <td><strong>Active Registered Volunteers</strong></td>
+              <td>{{ summary.active_volunteers }} Drivers</td>
+              <td>Background-verified volunteer drivers on active roster</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

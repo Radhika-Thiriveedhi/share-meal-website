@@ -1,11 +1,13 @@
+import io
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, Response
 from storage.json_storage import storage
 from services.safety_service import SafetyService
 from services.backup_service import BackupService
 from services.audit_service import AuditService
 from services.notification_service import NotificationService
 from services.donation_service import DonationService
+from services.analytics_service import AnalyticsService
 from config import Config
 from utils.decorators import login_required, role_required
 
@@ -213,6 +215,45 @@ def resolve_safety_report(report_id):
     success, msg = SafetyService.resolve_report(report_id, admin_id, resolution, notes)
     flash(msg, "success" if success else "danger")
     return redirect(url_for('admin.safety_detail', report_id=report_id))
+
+@admin_bp.route('/analytics')
+@login_required
+@role_required('admin')
+def analytics():
+    """Real-time platform analytics, category distributions, and community impact."""
+    summary = AnalyticsService.get_summary_metrics()
+    categories = AnalyticsService.get_category_breakdown()
+    top_donors = AnalyticsService.get_donor_leaderboard(limit=5)
+    top_orgs = AnalyticsService.get_organization_leaderboard(limit=5)
+
+    return render_template(
+        'admin/analytics.html',
+        active_page='analytics',
+        summary=summary,
+        categories=categories,
+        top_donors=top_donors,
+        top_orgs=top_orgs
+    )
+
+@admin_bp.route('/reports')
+@login_required
+@role_required('admin')
+def reports():
+    """Platform reports overview and data export page."""
+    summary = AnalyticsService.get_summary_metrics()
+    return render_template('admin/reports.html', active_page='reports', summary=summary)
+
+@admin_bp.route('/reports/export/csv')
+@login_required
+@role_required('admin')
+def export_csv():
+    """Export platform donations record as CSV."""
+    csv_data = AnalyticsService.generate_donations_csv()
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=sharemeal_donations_report.csv"}
+    )
 
 @admin_bp.route('/audit-logs')
 @login_required
