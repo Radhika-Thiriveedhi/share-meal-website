@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from services.donation_service import DonationService
+from services.request_service import RequestService
 from storage.json_storage import storage
 from config import Config
 from utils.decorators import login_required, role_required, verified_required
@@ -15,12 +16,10 @@ def dashboard():
     donor_id = session.get('user_id')
     donations = DonationService.get_donor_donations(donor_id)
     
-    # Calculate real donor metrics
     total_published = sum(float(d.get('quantity_published', 0)) for d in donations)
     total_distributed = sum(float(d.get('quantity_distributed', 0)) for d in donations)
     active_listings = [d for d in donations if d.get('status') in ['available', 'request_received', 'confirmed', 'partially_fulfilled']]
     
-    # Find all requests for this donor's listings
     donation_ids = {d['id'] for d in donations}
     all_requests = storage.find_where(Config.REQUESTS_FILE, lambda r: r.get('donation_id') in donation_ids)
     pending_requests = [r for r in all_requests if r.get('status') == 'pending']
@@ -169,6 +168,56 @@ def cancel_donation(donation_id):
     success, msg = DonationService.cancel_donation(donation_id, donor_id, reason)
     flash(msg, "success" if success else "danger")
     return redirect(url_for('donor.donations_list'))
+
+@donor_bp.route('/requests')
+@login_required
+@role_required('donor')
+@verified_required
+def requests_list():
+    """Incoming requests from organizations for this donor's listings."""
+    donor_id = session.get('user_id')
+    donations = DonationService.get_donor_donations(donor_id)
+    donation_map = {d['id']: d for d in donations}
+    
+    all_requests = storage.find_where(Config.REQUESTS_FILE, lambda r: r.get('donation_id') in donation_map)
+    all_requests.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    # Attach food_name and available quantity to each request for template rendering
+    for r in all_requests:
+        don = donation_map.get(r.get('donation_id'))
+        if don:
+            r['food_name'] = don.get('food_name')
+            r['unit'] = don.get('unit')
+            r['quantity_available'] = don.get('quantity_available')
+
+    return render_template(
+        'donor/requests_list.html',
+        active_page='requests',
+        requests=all_requests
+    )
+
+@donor_bp.route('/requests/<request_id>/approve', methods=['POST'])
+@login_required
+@role_required('donor')
+@verified_required
+def approve_request(request_id):
+    """Approve incoming charity food request and reserve portions."""
+    donor_id = session.get('user_id')
+    success, msg = RequestService.approve_request(request_id, donor_id)
+    flash(msg, "success" if success else "danger")
+    return redirect(url_for('donor.requests_list'))
+
+@donor_bp.route('/requests/<request_id>/reject', methods=['POST'])
+@login_required
+@role_required('donor')
+@verified_required
+def reject_request(request_id):
+    """Reject incoming charity request with explanation reason."""
+    donor_id = session.get('user_id')
+    reason = request.form.get('reason', 'Unable to fulfill at this time')
+    success, msg = RequestService.reject_request(request_id, donor_id, reason)
+    flash(msg, "info" if success else "danger")
+    return redirect(url_for('donor.requests_list'))
 
 @donor_bp.route('/history')
 @login_required
