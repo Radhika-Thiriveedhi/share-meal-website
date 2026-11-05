@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}How It Works — ShareMeal Platform{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 960px;">
+  <div style="text-align: center; margin-bottom: var(--space-2xl);">
+    <span class="badge badge-available" style="margin-bottom: 0.5rem;">End-to-End Logistics</span>
+    <h1>The Surplus Food Redistribution Lifecycle</h1>
+    <p class="lead" style="max-width: 650px; margin: 0 auto;">
+      A synchronized, safe, and transparent eight-step workflow ensuring dignity, compliance, and efficiency at every handoff.
+    </p>
+  </div>
+
+  <!-- Stepper Graphic Container -->
+  <div class="card" style="margin-bottom: var(--space-2xl);">
+    <div class="card-body">
+      <div class="workflow-stepper">
+        <div class="step-item active">
+          <div class="step-circle">1</div>
+          <div class="step-label">Publish Food</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">2</div>
+          <div class="step-label">Request Sent</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">3</div>
+          <div class="step-label">Confirmed</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">4</div>
+          <div class="step-label">Volunteer Assigned</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">5</div>
+          <div class="step-label">Picked Up</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">6</div>
+          <div class="step-label">Delivered</div>
+        </div>
+        <div class="step-item active">
+          <div class="step-circle">7</div>
+          <div class="step-label">Confirmed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Step Explanations -->
+  <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+    <!-- Step 1 -->
+    <div class="card">
+      <div class="card-body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
+        <span class="badge badge-available" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">Step 1</span>
+        <div>
+          <h4>Donor Creates Surplus Listing</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.3rem;">
+            A restaurant, bakery, or hotel logs in and submits food details: item name, quantity, preparation timestamp, collection deadline, storage conditions (refrigerated, hot-held, ambient), packaging type, and allergen declarations.
+          </p>
+          <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 600;">Status: Available</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2 & 3 -->
+    <div class="card">
+      <div class="card-body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
+        <span class="badge badge-warning" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">Steps 2 & 3</span>
+        <div>
+          <h4>Organization Requests & Donor Approves</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.3rem;">
+            A verified shelter or community kitchen discovers the listing and requests the specific portions they can distribute. The donor reviews the receiving organization's profile and confirms the request. The quantity is reserved atomically to prevent over-allocation.
+          </p>
+          <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 600;">Status: Request Received &rarr; Confirmed (Reserved)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 & 5 -->
+    <div class="card">
+      <div class="card-body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
+        <span class="badge badge-info" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">Steps 4 & 5</span>
+        <div>
+          <h4>Volunteer Assigned & Food Picked Up</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.3rem;">
+            A verified volunteer accepts the dispatch task and receives direct donor contact and loading dock instructions. At the donor kitchen, the volunteer verifies packaging integrity and collection temperature before confirming pickup.
+          </p>
+          <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 600;">Status: Volunteer Assigned &rarr; Picked Up</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6, 7 & 8 -->
+    <div class="card">
+      <div class="card-body" style="display: flex; gap: var(--space-md); align-items: flex-start;">
+        <span class="badge badge-success" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">Steps 6, 7 & 8</span>
+        <div>
+          <h4>Delivery & Receipt Confirmation</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.3rem;">
+            The volunteer delivers the food to the receiving shelter. The receiving supervisor inspects the items, logs arrival temperature and actual received quantity, and signs off. The donation status transitions to Completed, and impact statistics update instantly.
+          </p>
+          <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 600;">Status: Delivered &rarr; Receipt Confirmed &rarr; Completed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: var(--space-2xl);">
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Involved Today &rarr;</a>
+  </div>
+</div>
+{% endblock %}
