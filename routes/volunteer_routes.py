@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from services.volunteer_service import VolunteerService
 from services.donation_service import DonationService
 from services.request_service import RequestService
+from services.safety_service import SafetyService
 from storage.json_storage import storage
 from config import Config
 from utils.decorators import login_required, role_required, verified_required
@@ -17,7 +18,6 @@ def dashboard():
     volunteer_id = session.get('user_id')
     my_missions = VolunteerService.get_volunteer_missions(volunteer_id)
     
-    # Active mission (if any currently in progress)
     active_mission = next((m for m in my_missions if m.get('status') in ['volunteer_assigned', 'picked_up']), None)
     active_donation = DonationService.get_donation_by_id(active_mission.get('donation_id')) if active_mission else None
 
@@ -123,6 +123,38 @@ def delivery_confirm(request_id):
         return redirect(url_for('volunteer.history'))
 
     return render_template('volunteer/delivery_confirm.html', req=req, donation=donation, receiver=receiver)
+
+@volunteer_bp.route('/tasks/<request_id>/report-issue', methods=['GET', 'POST'])
+@login_required
+@role_required('volunteer')
+@verified_required
+def report_issue(request_id):
+    """Volunteer reports collection delays, temperature violations, or packaging defects."""
+    volunteer_id = session.get('user_id')
+    req = RequestService.get_request_by_id(request_id)
+    if not req or req.get('volunteer_id') != volunteer_id:
+        flash("Mission not found.", "danger")
+        return redirect(url_for('volunteer.dashboard'))
+
+    donation = DonationService.get_donation_by_id(req.get('donation_id'))
+
+    if request.method == 'POST':
+        issue_type = request.form.get('issue_type')
+        description = request.form.get('description', '')
+
+        SafetyService.file_report(
+            donation_id=donation['id'],
+            reporter_id=volunteer_id,
+            reporter_role='volunteer',
+            reporter_name=session.get('name'),
+            report_type=issue_type,
+            description=description,
+            request_id=request_id
+        )
+        flash("Safety incident reported. The food item has been quarantined for admin review.", "warning")
+        return redirect(url_for('volunteer.dashboard'))
+
+    return render_template('volunteer/report_issue.html', req=req, donation=donation)
 
 @volunteer_bp.route('/history')
 @login_required
