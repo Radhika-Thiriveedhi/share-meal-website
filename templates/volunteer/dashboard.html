@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Volunteer Dispatch Hub — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Volunteer Dispatch Operations</h1>
+        <p class="page-subtitle">Welcome, {{ session.get('name') }}. Transport food safely to local community shelters.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('volunteer.tasks_available') }}" class="btn btn-primary">Find Available Missions &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Active Mission Alert Box if currently on a mission -->
+    {% if active_mission %}
+      <div class="card" style="margin-bottom: var(--space-xl); border-left: 4px solid var(--color-primary); background-color: #FBFDFB;">
+        <div class="card-header" style="background: transparent;">
+          <div>
+            <span class="badge badge-warning" style="margin-bottom: 0.25rem;">Mission In Progress</span>
+            <h3 class="card-title" style="margin: 0;">{{ active_donation.food_name if active_donation else 'Active Food Transport' }}</h3>
+          </div>
+          <div>
+            {% set status = active_mission.status %}
+            {% include 'components/_badge.html' %}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6">
+              <div style="font-size: 0.9rem; line-height: 1.7;">
+                <div>Pickup: <strong>{{ active_donation.donor_name if active_donation else 'Donor' }}</strong></div>
+                <div>Address: {{ active_donation.pickup_address if active_donation else 'See details' }}</div>
+                <div>Quantity: <strong>{{ active_mission.quantity_requested }} {{ active_donation.unit if active_donation else 'portions' }}</strong></div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div style="font-size: 0.9rem; line-height: 1.7;">
+                <div>Deliver To: <strong>{{ active_mission.organization_name }}</strong></div>
+                <div>Urgency: <span class="badge badge-warning">{{ active_mission.urgency|capitalize }}</span></div>
+                <div>Status: <strong>{{ active_mission.status|replace('_', ' ')|capitalize }}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer" style="background: transparent; justify-content: space-between;">
+          <span style="font-size: 0.82rem; color: var(--color-text-muted);">Please maintain insulated carrier temperatures during transport.</span>
+          <a href="{{ url_for('volunteer.task_detail', request_id=active_mission.id) }}" class="btn btn-primary btn-sm">
+            Open Mission Dispatch Sheet &rarr;
+          </a>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-label">Available Missions</div>
+        <div class="stat-value">{{ available_tasks_count }}</div>
+        <div class="stat-meta">Collections ready in municipality</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Completed Missions</div>
+        <div class="stat-value">{{ completed_count }}</div>
+        <div class="stat-meta">Deliveries successfully handed off</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Status</div>
+        <div class="stat-value" style="font-size: 1.4rem; color: var(--color-primary);">Verified Courier</div>
+        <div class="stat-meta">Authorized for thermal food dispatch</div>
+      </div>
+    </div>
+
+    <!-- Available Missions Preview -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Available Nearby Collections</h3>
+        <a href="{{ url_for('volunteer.tasks_available') }}" class="btn btn-secondary btn-sm">View All {{ available_tasks_count }} &rarr;</a>
+      </div>
+
+      {% if available_preview %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Food Item</th>
+                <th>Quantity</th>
+                <th>Pickup Location</th>
+                <th>Destination Charity</th>
+                <th>Deadline</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in available_preview %}
+                <tr>
+                  <td><strong>{{ task.food_name }}</strong></td>
+                  <td>{{ task.quantity_requested }} {{ task.unit }}</td>
+                  <td>{{ task.donor_name }} ({{ task.pickup_address[:20] }}...)</td>
+                  <td>{{ task.organization_name }}</td>
+                  <td style="color:var(--color-warning); font-weight:600;">{{ task.collection_deadline|replace('T', ' ')[:16] }}</td>
+                  <td>
+                    <form method="POST" action="{{ url_for('volunteer.accept_task', request_id=task.id) }}" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-primary btn-sm">Accept Mission &rarr;</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 3rem 1rem;">
+          No unassigned collection missions currently available. New missions appear as soon as donors approve charity requests.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
