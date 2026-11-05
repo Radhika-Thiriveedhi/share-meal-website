@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}All Platform Requests — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Network Food Requests & Dispatches</h1>
+        <p class="page-subtitle">Real-time surveillance of requests, volunteer dispatch logistics, and shelter delivery confirmations.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Receiving Organization</th>
+              <th>Quantity</th>
+              <th>Urgency</th>
+              <th>Volunteer Courier</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in requests %}
+              <tr>
+                <td><code>{{ req.id }}</code></td>
+                <td>
+                  <strong>{{ req.organization_name }}</strong>
+                  <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ req.organization_contact }}</div>
+                </td>
+                <td><strong>{{ req.quantity_requested }}</strong></td>
+                <td>
+                  <span class="badge {% if req.urgency == 'critical' %}badge-danger{% elif req.urgency == 'urgent' %}badge-warning{% else %}badge-info{% endif %}">
+                    {{ req.urgency|capitalize }}
+                  </span>
+                </td>
+                <td>{{ req.volunteer_name or 'Awaiting courier' }}</td>
+                <td>
+                  {% set status = req.status %}
+                  {% include 'components/_badge.html' %}
+                </td>
+                <td style="color:var(--color-text-muted);">{{ req.created_at[:16]|replace('T', ' ') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
