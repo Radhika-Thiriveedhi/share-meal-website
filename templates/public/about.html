@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us — ShareMeal Platform{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 900px;">
+  <div style="margin-bottom: var(--space-2xl); text-align: center;">
+    <span class="badge badge-verified" style="margin-bottom: 0.5rem;">Our Mission</span>
+    <h1>Redistributing Wholesome Surplus to Nourish Communities</h1>
+    <p class="lead" style="max-width: 700px; margin: 0 auto;">
+      ShareMeal was founded with a single imperative: perfectly good food prepared in commercial kitchens should never end up in landfills while neighbors face hunger.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl);">
+    <div class="card-body">
+      <h3>The Challenge: A Disconnected Supply Chain</h3>
+      <p>
+        Commercial food establishments — including hotels, banquet facilities, high-volume restaurants, supermarkets, and artisan bakeries — operate in environments with unavoidable demand variability. At the close of business or end of an event, large quantities of safe, freshly prepared food remain unconsumed.
+      </p>
+      <p>
+        Meanwhile, local emergency shelters, transitional housing facilities, and community kitchens struggle to stretch limited budgets to provide high-protein, balanced meals to the families they serve.
+      </p>
+      <p>
+        Historically, the barrier to connecting these two groups has been logistics, time pressure, and food safety uncertainty. ShareMeal removes these obstacles with structured protocols, role-based workflows, and volunteer coordination.
+      </p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom: var(--space-xl);">
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-body">
+          <h4>Food Safety First</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            We enforce strict cold-chain standards, allergen disclosures, and mandatory packaging declarations. Every listing has a hard expiration deadline, and any participant can raise an immediate safety freeze.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-body">
+          <h4>Transparent Verification</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            No entity participates without administrative verification. Commercial donors provide food health permits, receiving organizations provide 501(c)(3) or charitable registration, and volunteers provide ID verification.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h3>Environmental Impact</h3>
+      <p>
+        Food waste accounts for approximately 8-10% of global greenhouse gas emissions. For every kilogram of cooked surplus food rescued and redirected to human consumption:
+      </p>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1rem; color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.8;">
+        <li><strong>2.5 kg of CO2 equivalent emissions</strong> are averted from decomposing in municipal landfills.</li>
+        <li><strong>450 liters of agricultural water</strong> embedded in crop production, processing, and refrigeration are preserved.</li>
+        <li><strong>High-protein meals</strong> reach individuals without requiring additional food manufacturing footprints.</li>
+      </ul>
+      <div style="margin-top: 1.5rem;">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Join the ShareMeal Movement &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
