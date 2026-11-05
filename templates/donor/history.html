@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Donation History & Impact Certificates — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Completed Donations History</h1>
+        <p class="page-subtitle">Verifiable log of surplus food successfully rescued and delivered to community organizations.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="stat-card primary" style="margin-bottom: var(--space-xl); max-width: 400px;">
+      <div class="stat-label">Total Surplus Food Rescued</div>
+      <div class="stat-value">{{ total_distributed|int }}</div>
+      <div class="stat-meta">Lifetime portions and kilograms delivered to shelters</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Completed Redistribution Records</h3>
+      </div>
+      {% if completed_donations %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Quantity Distributed</th>
+                <th>Completed Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for don in completed_donations %}
+                <tr>
+                  <td><strong>{{ don.food_name }}</strong></td>
+                  <td>{{ don.food_category|replace('_', ' ')|capitalize }}</td>
+                  <td><strong style="color:var(--color-primary);">{{ don.quantity_distributed }}</strong> {{ don.unit }}</td>
+                  <td>{{ don.updated_at[:10] }}</td>
+                  <td>
+                    <span class="badge badge-completed">Completed</span>
+                  </td>
+                  <td>
+                    <a href="{{ url_for('donor.donation_detail', donation_id=don.id) }}" class="btn btn-secondary btn-sm">Inspect Record</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 3rem 1rem;">
+          No completed donation handoffs recorded yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
