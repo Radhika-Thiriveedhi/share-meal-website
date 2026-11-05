@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Dashboard — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Donor Operations Hub</h1>
+        <p class="page-subtitle">Welcome back, {{ session.get('name') }}. Manage your surplus listings and community dispatches.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.create_donation') }}" class="btn btn-primary">+ Create Food Donation</a>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-label">Active Listings</div>
+        <div class="stat-value">{{ active_listings_count }}</div>
+        <div class="stat-meta">Ready or currently reserved</div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-label">Pending Requests</div>
+        <div class="stat-value">{{ pending_requests_count }}</div>
+        <div class="stat-meta">Charities awaiting your approval</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Total Published</div>
+        <div class="stat-value">{{ total_published|int }}</div>
+        <div class="stat-meta">Lifetime portions / kg submitted</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Successfully Delivered</div>
+        <div class="stat-value">{{ total_distributed|int }}</div>
+        <div class="stat-meta">Confirmed received by shelters</div>
+      </div>
+    </div>
+
+    <!-- Pending Requests Alert Table -->
+    {% if pending_requests %}
+      <div class="card" style="margin-bottom: var(--space-xl); border-left: 4px solid var(--color-warning);">
+        <div class="card-header">
+          <h3 class="card-title">Pending Organization Requests Awaiting Action</h3>
+          <span class="badge badge-warning">{{ pending_requests|length }} Action Required</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Organization</th>
+                <th>Requested Qty</th>
+                <th>Urgency</th>
+                <th>Beneficiaries Target</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in pending_requests %}
+                <tr>
+                  <td><strong>{{ req.organization_name }}</strong></td>
+                  <td>{{ req.quantity_requested }}</td>
+                  <td>
+                    <span class="badge {% if req.urgency == 'critical' %}badge-danger{% elif req.urgency == 'urgent' %}badge-warning{% else %}badge-info{% endif %}">
+                      {{ req.urgency|capitalize }}
+                    </span>
+                  </td>
+                  <td>{{ req.intended_beneficiaries or 'Community dining service' }}</td>
+                  <td>
+                    <a href="{{ url_for('donor.requests_list') }}" class="btn btn-primary btn-sm">Review & Approve &rarr;</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Recent Listings Table -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Surplus Listings</h3>
+        <a href="{{ url_for('donor.donations_list') }}" class="btn btn-secondary btn-sm">View All Listings &rarr;</a>
+      </div>
+
+      {% if donations %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Food Item</th>
+                <th>Category</th>
+                <th>Available / Published</th>
+                <th>Collection Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for don in donations %}
+                <tr>
+                  <td><strong>{{ don.food_name }}</strong></td>
+                  <td>{{ don.food_category|replace('_', ' ')|capitalize }}</td>
+                  <td>
+                    <strong>{{ don.quantity_available }}</strong> / {{ don.quantity_published }} {{ don.unit }}
+                  </td>
+                  <td style="color: var(--color-text-muted);">
+                    {{ don.collection_deadline|replace('T', ' ')[:16] }}
+                  </td>
+                  <td>
+                    {% set status = don.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('donor.donation_detail', donation_id=don.id) }}" class="btn btn-secondary btn-sm">Details</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; padding: 3rem 1rem;">
+          <p style="color: var(--color-text-muted); margin-bottom: 1rem;">You have not published any surplus food donations yet.</p>
+          <a href="{{ url_for('donor.create_donation') }}" class="btn btn-primary">+ Create First Donation</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
