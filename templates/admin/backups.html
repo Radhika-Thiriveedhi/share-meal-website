@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}JSON Database Snapshot Archives — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">JSON Data Backup Management</h1>
+        <p class="page-subtitle">Automatic and on-demand compressed snapshots of all platform JSON databases.</p>
+      </div>
+      <div>
+        <form method="POST" action="{{ url_for('admin.create_backup') }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-primary">+ Create New Snapshot Now</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-header">
+        <h3 class="card-title">Available Snapshot Archives</h3>
+      </div>
+      {% if backups %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Backup Archive Filename</th>
+                <th>Created Timestamp</th>
+                <th>Archive Size</th>
+                <th>Integrity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in backups %}
+                <tr>
+                  <td><code>{{ b.filename }}</code></td>
+                  <td>{{ b.created_at }}</td>
+                  <td>{{ b.size_kb }} KB</td>
+                  <td><span class="badge badge-success">Valid Zip Archive</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 3rem 1rem;">
+          No backups generated yet. Click "Create New Snapshot Now" to create your first archive.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
