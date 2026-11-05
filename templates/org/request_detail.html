@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Progress — {{ req.id }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <h1 class="page-title" style="margin: 0;">Food Request Tracking</h1>
+          {% set status = req.status %}
+          {% include 'components/_badge.html' %}
+        </div>
+        <p class="page-subtitle">Request ID: {{ req.id }} &bull; Submitted {{ req.created_at[:16]|replace('T', ' ') }}</p>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem;">
+        {% if req.status in ['pending', 'approved'] %}
+          <button type="button" class="btn btn-danger" onclick="openModal('cancelReqModal')">Cancel Request</button>
+        {% endif %}
+        {% if req.status == 'delivered' %}
+          <a href="{{ url_for('org.confirm_receipt', request_id=req.id) }}" class="btn btn-primary">Confirm Food Received &rarr;</a>
+        {% endif %}
+        <a href="{{ url_for('org.requests_list') }}" class="btn btn-secondary">&larr; Back to Requests</a>
+      </div>
+    </div>
+
+    <!-- Stepper Tracker -->
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-body">
+        <div class="workflow-stepper">
+          <div class="step-item {% if req.status in ['pending', 'approved', 'volunteer_assigned', 'picked_up', 'delivered', 'receipt_confirmed'] %}active{% endif %}">
+            <div class="step-circle">1</div>
+            <div class="step-label">Submitted</div>
+          </div>
+          <div class="step-item {% if req.status in ['approved', 'volunteer_assigned', 'picked_up', 'delivered', 'receipt_confirmed'] %}active{% endif %}">
+            <div class="step-circle">2</div>
+            <div class="step-label">Approved</div>
+          </div>
+          <div class="step-item {% if req.status in ['volunteer_assigned', 'picked_up', 'delivered', 'receipt_confirmed'] %}active{% endif %}">
+            <div class="step-circle">3</div>
+            <div class="step-label">Courier En Route</div>
+          </div>
+          <div class="step-item {% if req.status in ['picked_up', 'delivered', 'receipt_confirmed'] %}active{% endif %}">
+            <div class="step-circle">4</div>
+            <div class="step-label">Picked Up</div>
+          </div>
+          <div class="step-item {% if req.status in ['delivered', 'receipt_confirmed'] %}active{% endif %}">
+            <div class="step-circle">5</div>
+            <div class="step-label">Delivered</div>
+          </div>
+          <div class="step-item {% if req.status == 'receipt_confirmed' %}active{% endif %}">
+            <div class="step-circle">6</div>
+            <div class="step-label">Completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="row" style="margin-bottom: var(--space-xl);">
+      <!-- Food & Donor Information -->
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Food & Donor Information</h4>
+          </div>
+          <div class="card-body" style="font-size: 0.9rem; line-height: 1.8;">
+            {% if donation %}
+              <div>Food Item: <strong>{{ donation.food_name }}</strong></div>
+              <div>Donor: <strong>{{ donation.donor_name }}</strong></div>
+              <div>Donor Phone: <strong>{{ donation.donor_phone }}</strong></div>
+              <div>Pickup Address: <strong>{{ donation.pickup_address }}</strong></div>
+              <div>Storage: <strong>{{ donation.storage_conditions|replace('_', ' ')|capitalize }}</strong></div>
+              <div style="margin-top: 0.5rem; color: var(--color-warning); font-weight: 600;">
+                Collection Deadline: {{ donation.collection_deadline|replace('T', ' ')[:16] }}
+              </div>
+            {% else %}
+              <div style="color:var(--color-text-muted);">Donation listing details unavailable.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Volunteer & Dispatch Status -->
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Courier Dispatch Status</h4>
+          </div>
+          <div class="card-body" style="font-size: 0.9rem; line-height: 1.8;">
+            {% if req.volunteer_name %}
+              <div>Volunteer: <strong>{{ req.volunteer_name }}</strong></div>
+              <div>Volunteer Phone: <strong>{{ req.volunteer_phone or 'Available upon dispatch' }}</strong></div>
+              {% if req.pickup_time %}
+                <div>Pickup Timestamp: <strong>{{ req.pickup_time[:16]|replace('T', ' ') }}</strong></div>
+              {% endif %}
+              {% if req.delivered_time %}
+                <div>Delivered Timestamp: <strong>{{ req.delivered_time[:16]|replace('T', ' ') }}</strong></div>
+              {% endif %}
+              {% if req.pickup_notes %}
+                <div style="margin-top: 0.5rem; background-color: var(--color-bg-subtle); padding: 0.5rem; border-radius: 4px;">
+                  <strong>Courier Notes:</strong> {{ req.pickup_notes }}
+                </div>
+              {% endif %}
+            {% else %}
+              <div style="color:var(--color-text-muted); padding: 1rem 0;">
+                Awaiting community volunteer assignment. Once a nearby courier claims the mission, their contact details will be posted here.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Request Modal -->
+{% include 'org/cancel_request.html' %}
+{% endblock %}
