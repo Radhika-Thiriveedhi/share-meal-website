@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Community Impact & Environmental Metrics — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 960px;">
+  <div style="text-align: center; margin-bottom: var(--space-2xl);">
+    <span class="badge badge-completed" style="margin-bottom: 0.5rem;">Live Real-Time Impact</span>
+    <h1>Measuring Community Relief & Environmental Gains</h1>
+    <p class="lead" style="max-width: 650px; margin: 0 auto;">
+      All analytics displayed below are computed dynamically from actual verified collection receipts stored in our platform databases.
+    </p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card primary">
+      <div class="stat-label">Food Successfully Rescued</div>
+      <div class="stat-value">{{ total_distributed|int }}</div>
+      <div class="stat-meta">Portions & kg delivered to community shelters</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Completed Relocations</div>
+      <div class="stat-value">{{ completed_requests }}</div>
+      <div class="stat-meta">Verified volunteer collection missions</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Greenhouse Gas Averted</div>
+      <div class="stat-value">{{ co2_saved }} kg</div>
+      <div class="stat-meta">CO2e prevented from municipal landfill decay</div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-label">Freshwater Conserved</div>
+      <div class="stat-value">{{ water_saved|int }} L</div>
+      <div class="stat-meta">Embedded agricultural water footprint saved</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-xl);">
+    <div class="card-header">
+      <h3 class="card-title">How ShareMeal Validates Impact</h3>
+    </div>
+    <div class="card-body">
+      <p>
+        Unlike theoretical impact calculators, ShareMeal maintains a rigorous chain of custody. A food donation only increments the <code>quantity_distributed</code> metric when:
+      </p>
+      <ol style="margin-left: 1.5rem; color: var(--color-text-muted); font-size: 0.92rem; line-height: 1.8;">
+        <li>A verified donor publishes a listing with specific weight/portion values.</li>
+        <li>An authorized receiving charity approves and requests the portion.</li>
+        <li>A vetted volunteer confirms physical pickup from the commercial kitchen.</li>
+        <li>The receiving organization supervisor executes a digital receipt confirmation acknowledging the food arrived intact and safe for distribution.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-body">
+          <h4>Social ROI for Commercial Kitchens</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            Donors receive detailed tax-deductible surplus redistribution certificates at year-end, along with verifiable ESG (Environmental, Social, and Governance) data on municipal waste diversion.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card" style="height: 100%;">
+        <div class="card-body">
+          <h4>Nutritional Support for Shelters</h4>
+          <p style="font-size: 0.9rem; color: var(--color-text-muted);">
+            Shelters and soup kitchens replace low-nutrient packaged staples with chef-prepared, balanced, high-protein surplus dishes, elevating dignity and health outcomes for community residents.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
