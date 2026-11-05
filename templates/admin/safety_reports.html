@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Food Safety Incident Triage — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Food Safety & Quality Triage Board</h1>
+        <p class="page-subtitle">Investigate reported temperature abuses, packaging failures, and quarantine actions.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Admin Overview</a>
+      </div>
+    </div>
+
+    <!-- Active Reports Alert -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Incident Reports Registry</h3>
+        <span class="badge badge-warning">{{ reports|length }} Total Reports</span>
+      </div>
+
+      {% if reports %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Hazard Category</th>
+                <th>Donation ID</th>
+                <th>Reported By</th>
+                <th>Incident Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rep in reports %}
+                <tr>
+                  <td><code>{{ rep.id }}</code></td>
+                  <td>
+                    <span class="badge badge-danger">
+                      {{ rep.report_type|replace('_', ' ')|capitalize }}
+                    </span>
+                  </td>
+                  <td><code>{{ rep.donation_id }}</code></td>
+                  <td>
+                    <strong>{{ rep.reporter_name }}</strong>
+                    <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ rep.reporter_role|capitalize }}</div>
+                  </td>
+                  <td style="color:var(--color-text-muted);">{{ rep.created_at[:16]|replace('T', ' ') }}</td>
+                  <td>
+                    {% if rep.status == 'under_review' %}
+                      <span class="badge badge-warning">Under Review</span>
+                    {% elif rep.status == 'resolved_safe' %}
+                      <span class="badge badge-success">Cleared Safe</span>
+                    {% elif rep.status == 'resolved_discarded' %}
+                      <span class="badge badge-danger">Discarded</span>
+                    {% else %}
+                      <span class="badge badge-info">{{ rep.status|capitalize }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('admin.safety_detail', report_id=rep.id) }}" class="btn btn-primary btn-sm">
+                      Investigate &rarr;
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+          No safety incidents or quality reports currently registered.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
