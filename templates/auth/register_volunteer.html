@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Join as Volunteer Courier — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 700px;">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-info" style="margin-bottom: 0.25rem;">Volunteer Dispatch</span>
+        <h2 style="font-size: 1.35rem; margin: 0;">Community Volunteer Registration</h2>
+      </div>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-secondary btn-sm">&larr; Change Role</a>
+    </div>
+
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('auth.register_role', role='volunteer') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          1. Personal Information
+        </h4>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="name">Full Legal Name <span class="required">*</span></label>
+              <input type="text" id="name" name="name" class="form-control" placeholder="Alex Rivera" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="phone">Mobile Phone (For Dispatch) <span class="required">*</span></label>
+              <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 (555) 000-0000" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="address">Residential Address <span class="required">*</span></label>
+          <input type="text" id="address" name="address" class="form-control" placeholder="142 Pine Street, Apt 3B" required>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="city">City / Borough <span class="required">*</span></label>
+              <input type="text" id="city" name="city" class="form-control" placeholder="Metropolis" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="postal_code">Postal Code <span class="required">*</span></label>
+              <input type="text" id="postal_code" name="postal_code" class="form-control" placeholder="94104" required>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+          2. Transportation & Availability
+        </h4>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="org_type">Transportation Mode <span class="required">*</span></label>
+              <select id="org_type" name="org_type" class="form-control" required>
+                <option value="car_suv">Car / SUV with Trunk Space</option>
+                <option value="van_truck">Cargo Van / Pickup Truck</option>
+                <option value="cargo_bike">Cargo Bicycle / e-Bike</option>
+                <option value="foot_transit">Walking / Public Transit (Small Parcels)</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="operating_hours">General Availability</label>
+              <input type="text" id="operating_hours" name="operating_hours" class="form-control" placeholder="e.g. Weekday evenings & Saturdays">
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+          3. Account Security
+        </h4>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="email">Account Email <span class="required">*</span></label>
+              <input type="email" id="email" name="email" class="form-control" placeholder="alex@volunteer.org" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="password">Password <span class="required">*</span></label>
+              <input type="password" id="password" name="password" class="form-control" data-validate-strength data-feedback-id="pwd-hint-vol" required>
+              <div id="pwd-hint-vol" class="form-hint">8+ chars with uppercase, lowercase, & number.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-check" style="margin-top: 1rem;">
+          <input type="checkbox" id="vol_agree" name="vol_agree" class="form-check-input" required>
+          <label class="form-check-label" for="vol_agree">
+            I agree to maintain thermal holding containers during food transport and follow all safety checklists provided by donor kitchens.
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+          Submit Volunteer Courier Application &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
