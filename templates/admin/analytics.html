@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Real-Time Platform Analytics — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Verified Platform Analytics</h1>
+        <p class="page-subtitle">Real-time statistics computed strictly from physical collection and receipt records.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-primary">Generate Reports &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Core Metrics Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-label">Distributed to Shelters</div>
+        <div class="stat-value">{{ summary.total_distributed|int }}</div>
+        <div class="stat-meta">Verified received portions / kg</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Published Volume</div>
+        <div class="stat-value">{{ summary.total_published|int }}</div>
+        <div class="stat-meta">Total surplus listed by donors</div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-label">Currently Reserved</div>
+        <div class="stat-value">{{ summary.total_reserved|int }}</div>
+        <div class="stat-meta">Approved requests in courier transit</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Available Right Now</div>
+        <div class="stat-value">{{ summary.total_available|int }}</div>
+        <div class="stat-meta">Active unreserved surplus</div>
+      </div>
+    </div>
+
+    <!-- Second Metric Row: Operations & Environment -->
+    <div class="stats-grid" style="margin-bottom: var(--space-xl);">
+      <div class="stat-card">
+        <div class="stat-label">Completed Relocations</div>
+        <div class="stat-value">{{ summary.completed_collections }}</div>
+        <div class="stat-meta">Verified delivery handoffs</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Active Couriers</div>
+        <div class="stat-value">{{ summary.active_volunteers }}</div>
+        <div class="stat-meta">Verified volunteer drivers</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Greenhouse Gas Prevented</div>
+        <div class="stat-value" style="color:var(--color-primary);">{{ summary.co2_saved_kg }} kg</div>
+        <div class="stat-meta">Landfill methane emissions averted</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Water Conserved</div>
+        <div class="stat-value" style="color:var(--color-warning);">{{ summary.water_saved_liters|int }} L</div>
+        <div class="stat-meta">Agricultural water footprint saved</div>
+      </div>
+    </div>
+
+    <!-- Category Volume Distribution Bar Chart -->
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-header">
+        <h3 class="card-title">Surplus Distribution by Food Category</h3>
+      </div>
+      <div class="card-body">
+        <div id="categoryChartContainer" style="margin-bottom: 1.5rem;"></div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; font-size: 0.85rem;">
+          {% for cat in categories %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background-color: var(--color-bg-subtle); border-radius: 4px;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 10px; height: 10px; border-radius: 2px; background-color: {{ cat.color }}; display: inline-block;"></span>
+                {{ cat.label }}
+              </span>
+              <strong>{{ cat.value }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboards Grid -->
+    <div class="row">
+      <!-- Top Contributing Donors -->
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Top Contributing Donors</h4>
+          </div>
+          {% if top_donors %}
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Establishment</th>
+                    <th>Published</th>
+                    <th>Rescued</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for d in top_donors %}
+                    <tr>
+                      <td><strong>{{ d.name }}</strong></td>
+                      <td>{{ d.published|int }}</td>
+                      <td><strong style="color:var(--color-primary);">{{ d.distributed|int }}</strong></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="card-body" style="text-align: center; color: var(--color-text-muted);">No records found.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Top Receiving Organizations -->
+      <div class="col-6">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <h4 class="card-title">Top Relief Charities</h4>
+          </div>
+          {% if top_orgs %}
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Charity / Shelter</th>
+                    <th>Portions Received</th>
+                    <th>Completed Deliveries</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for o in top_orgs %}
+                    <tr>
+                      <td><strong>{{ o.name }}</strong></td>
+                      <td><strong style="color:var(--color-primary);">{{ o.received|int }}</strong></td>
+                      <td>{{ o.completed }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="card-body" style="text-align: center; color: var(--color-text-muted);">No records found.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const chartData = [
+    {% for cat in categories %}
+      { label: "{{ cat.label }}", value: {{ cat.value }}, color: "{{ cat.color }}" },
+    {% endfor %}
+  ];
+  if (window.renderBarChart) {
+    window.renderBarChart("categoryChartContainer", chartData, { height: 200 });
+  }
+});
+</script>
+{% endblock %}
