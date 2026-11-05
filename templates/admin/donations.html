@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}All Platform Donations — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Platform Surplus Donations Oversight</h1>
+        <p class="page-subtitle">Global audit view of all food listings published across commercial donors.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Food Item</th>
+              <th>Donor Establishment</th>
+              <th>Category</th>
+              <th>Available / Published</th>
+              <th>Collection Deadline</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for don in donations %}
+              <tr>
+                <td>
+                  <strong>{{ don.food_name }}</strong>
+                  <div style="font-size:0.75rem; color:var(--color-text-muted);">ID: {{ don.id }}</div>
+                </td>
+                <td>{{ don.donor_name }}</td>
+                <td>{{ don.food_category|replace('_', ' ')|capitalize }}</td>
+                <td>
+                  <strong>{{ don.quantity_available }}</strong> / {{ don.quantity_published }} {{ don.unit }}
+                  <div style="font-size:0.75rem; color:var(--color-text-muted);">
+                    Reserved: {{ don.quantity_reserved }} &bull; Distributed: {{ don.quantity_distributed }}
+                  </div>
+                </td>
+                <td style="color:var(--color-warning);">{{ don.collection_deadline|replace('T', ' ')[:16] }}</td>
+                <td>
+                  {% set status = don.status %}
+                  {% include 'components/_badge.html' %}
+                </td>
+                <td style="color:var(--color-text-muted);">{{ don.created_at[:10] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
