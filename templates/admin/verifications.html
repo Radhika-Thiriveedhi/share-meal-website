@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Verifications — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Entity Verification Queue</h1>
+        <p class="page-subtitle">Verify commercial food service permits, charity registration IDs, and volunteer credentials.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Pending Queue -->
+    <div class="card" style="margin-bottom: var(--space-xl); border-left: 4px solid var(--color-warning);">
+      <div class="card-header">
+        <h3 class="card-title">Pending Account Verifications ({{ pending_users|length }})</h3>
+      </div>
+      {% if pending_users %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Organization / Name</th>
+                <th>Role</th>
+                <th>License / Tax ID</th>
+                <th>Operating Hours</th>
+                <th>Physical Address</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in pending_users %}
+                <tr>
+                  <td>
+                    <strong>{{ u.org_name or u.name }}</strong>
+                    <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ u.email }} &bull; {{ u.phone }}</div>
+                  </td>
+                  <td>
+                    <span class="badge badge-warning">{{ u.role|capitalize }}</span>
+                    {% if u.org_type %}
+                      <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ u.org_type|replace('_', ' ')|capitalize }}</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div>License: <code>{{ u.license_number or 'N/A' }}</code></div>
+                    <div>Tax ID: <code>{{ u.tax_id or 'N/A' }}</code></div>
+                  </td>
+                  <td>{{ u.operating_hours or 'Standard' }}</td>
+                  <td>{{ u.address }}, {{ u.city }} {{ u.postal_code }}</td>
+                  <td style="color:var(--color-text-muted);">{{ u.created_at[:10] }}</td>
+                  <td>
+                    <div style="display:flex; gap:4px;">
+                      <form method="POST" action="{{ url_for('admin.approve_verification', user_id=u.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                      </form>
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="openRejectModal('{{ u.id }}', '{{ u.name }}')">Reject</button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; color: var(--color-text-muted); padding: 2.5rem;">
+          No pending account verifications.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Verified Accounts History -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recently Verified Entities</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Organization</th>
+              <th>Role</th>
+              <th>License / Reg</th>
+              <th>Verified Date</th>
+              <th>Verified By</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in verified_users %}
+              <tr>
+                <td>
+                  <strong>{{ u.org_name or u.name }}</strong>
+                  <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ u.email }}</div>
+                </td>
+                <td><span class="badge badge-info">{{ u.role|capitalize }}</span></td>
+                <td><code>{{ u.license_number or 'Verified' }}</code></td>
+                <td>{{ (u.verified_at or u.updated_at)[:10] }}</td>
+                <td>{{ u.verified_by or 'System' }}</td>
+                <td><span class="badge badge-verified">Verified</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for rejecting verification -->
+<div id="rejectVerifModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color:var(--color-danger);">Reject Registration</h4>
+      <button type="button" class="modal-close" onclick="closeModal('rejectVerifModal')">&times;</button>
+    </div>
+    <form id="reject_verif_form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-body">
+        <p>Please enter rejection reason for <strong id="reject_user_name"></strong>:</p>
+        <textarea name="reason" class="form-control" rows="3" placeholder="e.g. Unverifiable health permit or license credentials." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('rejectVerifModal')">Cancel</button>
+        <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openRejectModal(userId, name) {
+  document.getElementById('reject_verif_form').action = '/admin/verifications/' + userId + '/reject';
+  document.getElementById('reject_user_name').textContent = name;
+  openModal('rejectVerifModal');
+}
+</script>
+{% endblock %}
