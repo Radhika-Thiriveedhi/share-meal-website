@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Surplus Food Donation — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Publish Food Donation</h1>
+        <p class="page-subtitle">Provide complete food safety specifications and pickup timeline.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.donations_list') }}" class="btn btn-secondary">&larr; Back to Listings</a>
+      </div>
+    </div>
+
+    <div class="food-safety-banner">
+      <strong>Food Safety Compliance Notice</strong>
+      All items must have been prepared in an inspected commercial facility. Do not list items that have exceeded safe holding temperatures or have broken seals.
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('donor.create_donation') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+            1. Food Item Description
+          </h4>
+
+          <div class="row">
+            <div class="col-8">
+              <div class="form-group">
+                <label class="form-label" for="food_name">Food Item Name <span class="required">*</span></label>
+                <input type="text" id="food_name" name="food_name" class="form-control" placeholder="e.g. Mediterranean Grilled Chicken Breast & Vegetables" required>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="food_category">Category <span class="required">*</span></label>
+                <select id="food_category" name="food_category" class="form-control" required>
+                  <option value="">Select category...</option>
+                  {% for val, label in categories %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="quantity_published">Quantity Available <span class="required">*</span></label>
+                <input type="number" step="0.1" min="0.1" id="quantity_published" name="quantity_published" class="form-control" placeholder="e.g. 50" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="unit">Unit of Measure <span class="required">*</span></label>
+                <select id="unit" name="unit" class="form-control" required>
+                  <option value="portions">Portions / Individual Servings</option>
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="packages">Sealed Packages</option>
+                  <option value="boxes">Crates / Boxes</option>
+                  <option value="liters">Liters (Soup / Beverages)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+            2. Safety Timelines & Storage Holding
+          </h4>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="preparation_datetime">Preparation / Cooking Timestamp <span class="required">*</span></label>
+                <input type="datetime-local" id="preparation_datetime" name="preparation_datetime" class="form-control" required>
+                <div class="form-hint">Must not be in the future.</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="collection_deadline">Collection Cut-off Deadline <span class="required">*</span></label>
+                <input type="datetime-local" id="collection_deadline" name="collection_deadline" class="form-control" required>
+                <div class="form-hint">Uncollected food expires automatically after this time.</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="date-validation-warning" class="alert alert-warning" style="display: none; margin-bottom: 1rem;"></div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="storage_conditions">Storage Holding Condition <span class="required">*</span></label>
+                <select id="storage_conditions" name="storage_conditions" class="form-control" required>
+                  <option value="">Select required storage...</option>
+                  {% for val, label in storage_conditions %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="packaging_condition">Packaging Integrity <span class="required">*</span></label>
+                <select id="packaging_condition" name="packaging_condition" class="form-control" required>
+                  <option value="">Select packaging standard...</option>
+                  {% for val, label in packaging_conditions %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label class="form-label">Allergen Declarations (Select all that apply) <span class="required">*</span></label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; background-color: var(--color-bg-subtle); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+              {% for allergen in common_allergens %}
+                <div class="form-check">
+                  <input type="checkbox" id="allergen_{{ loop.index }}" name="allergens" value="{{ allergen }}" class="form-check-input">
+                  <label class="form-check-label" for="allergen_{{ loop.index }}">{{ allergen }}</label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+            3. Logistics & Pickup Instructions
+          </h4>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup_address">Physical Pickup Address <span class="required">*</span></label>
+            <input type="text" id="pickup_address" name="pickup_address" class="form-control" value="{{ session.get('address') or '' }}" placeholder="Loading dock or kitchen address" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup_instructions">Pickup & Loading Instructions</label>
+            <textarea id="pickup_instructions" name="pickup_instructions" class="form-control" rows="2" placeholder="e.g. Enter rear alley gate, ring bell 3, ask for Chef Marcus."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="special_handling_notes">Special Handling Notes</label>
+            <textarea id="special_handling_notes" name="special_handling_notes" class="form-control" rows="2" placeholder="e.g. Keep in insulated container above 60°C; do not stack boxes more than 2 high."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+            Publish Food Donation Listing &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
