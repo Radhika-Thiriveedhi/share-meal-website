@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}My Food Requests — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">My Food Requests</h1>
+        <p class="page-subtitle">Track the status of your requested surplus food donations and delivery dispatches.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('org.browse') }}" class="btn btn-primary">+ Request More Food</a>
+      </div>
+    </div>
+
+    <!-- Status Filters -->
+    <div style="margin-bottom: var(--space-md); display: flex; gap: var(--space-xs); flex-wrap: wrap;">
+      <a href="{{ url_for('org.requests_list', status='all') }}" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+      <a href="{{ url_for('org.requests_list', status='pending') }}" class="btn btn-sm {% if status_filter == 'pending' %}btn-primary{% else %}btn-secondary{% endif %}">Pending Approval</a>
+      <a href="{{ url_for('org.requests_list', status='approved') }}" class="btn btn-sm {% if status_filter == 'approved' %}btn-primary{% else %}btn-secondary{% endif %}">Approved</a>
+      <a href="{{ url_for('org.requests_list', status='volunteer_assigned') }}" class="btn btn-sm {% if status_filter == 'volunteer_assigned' %}btn-primary{% else %}btn-secondary{% endif %}">Courier Assigned</a>
+      <a href="{{ url_for('org.requests_list', status='picked_up') }}" class="btn btn-sm {% if status_filter == 'picked_up' %}btn-primary{% else %}btn-secondary{% endif %}">Picked Up</a>
+      <a href="{{ url_for('org.requests_list', status='delivered') }}" class="btn btn-sm {% if status_filter == 'delivered' %}btn-primary{% else %}btn-secondary{% endif %}">Delivered (Awaiting Confirmation)</a>
+      <a href="{{ url_for('org.requests_list', status='receipt_confirmed') }}" class="btn btn-sm {% if status_filter == 'receipt_confirmed' %}btn-primary{% else %}btn-secondary{% endif %}">Receipt Confirmed</a>
+    </div>
+
+    <div class="card">
+      {% if requests %}
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Requested Qty</th>
+                <th>Urgency</th>
+                <th>Volunteer Assigned</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requests %}
+                <tr>
+                  <td><code>{{ req.id }}</code></td>
+                  <td><strong>{{ req.quantity_requested }}</strong></td>
+                  <td>
+                    <span class="badge {% if req.urgency == 'critical' %}badge-danger{% elif req.urgency == 'urgent' %}badge-warning{% else %}badge-info{% endif %}">
+                      {{ req.urgency|capitalize }}
+                    </span>
+                  </td>
+                  <td>{{ req.volunteer_name or 'Pending volunteer' }}</td>
+                  <td>
+                    {% set status = req.status %}
+                    {% include 'components/_badge.html' %}
+                  </td>
+                  <td style="color:var(--color-text-muted);">{{ req.created_at[:16]|replace('T', ' ') }}</td>
+                  <td>
+                    <a href="{{ url_for('org.request_detail', request_id=req.id) }}" class="btn btn-secondary btn-sm">Track Progress</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body" style="text-align: center; padding: 3rem 1rem; color: var(--color-text-muted);">
+          <p style="margin-bottom: 1rem;">No requests match this filter.</p>
+          <a href="{{ url_for('org.browse') }}" class="btn btn-primary">Browse Available Food</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
