@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Verification Pending — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 650px;">
+  <div class="card" style="text-align: center;">
+    <div class="card-body" style="padding: 3rem 2rem;">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background-color: var(--color-warning-light); color: var(--color-warning); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+
+      <span class="badge badge-warning" style="margin-bottom: 0.75rem;">Status: Verification Pending</span>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.75rem;">Your Account is Under Review</h2>
+      
+      <p style="color: var(--color-text-muted); line-height: 1.6; max-width: 500px; margin: 0 auto 1.5rem auto;">
+        Thank you for joining ShareMeal, <strong>{{ session.get('name') }}</strong>. To protect food safety and community recipients, our administrative team reviews food health permits and registration credentials before enabling donation requests or publishing.
+      </p>
+
+      <div style="background-color: var(--color-bg-subtle); border-radius: var(--radius-md); padding: 1rem; max-width: 450px; margin: 0 auto 2rem auto; text-align: left; font-size: 0.85rem; color: var(--color-text-main); border: 1px solid var(--color-border);">
+        <div style="font-weight: 600; margin-bottom: 0.25rem;">What happens next?</div>
+        <ul style="margin-left: 1.2rem; color: var(--color-text-muted); line-height: 1.5;">
+          <li>Administrators cross-check your submitted license and facility details.</li>
+          <li>Most accounts are verified within 1 to 2 business days.</li>
+          <li>You will receive an internal alert as soon as verification is approved.</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">Review Account Profile</a>
+        <a href="{{ url_for('public.index') }}" class="btn btn-outline">Explore Community Impact</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Sign Out</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
