@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Join ShareMeal — Select Account Role{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 900px;">
+  <div style="text-align: center; margin-bottom: var(--space-2xl);">
+    <h1>Select Your Participant Role</h1>
+    <p class="lead">ShareMeal connects four distinct stakeholders in surplus food recovery. Choose the role that matches your organization.</p>
+  </div>
+
+  <div class="role-grid">
+    <!-- Role 1: Donor -->
+    <div class="role-card">
+      <div class="role-card-badge">Surplus Generator</div>
+      <h3 class="role-card-title">Commercial Food Donor</h3>
+      <p class="role-card-desc">
+        For licensed restaurants, hotels, grocery stores, bakeries, corporate cafeterias, and event banquet organizers looking to redistribute surplus food.
+      </p>
+      <a href="{{ url_for('auth.register_role', role='donor') }}" class="btn btn-primary btn-block">Register as Food Donor &rarr;</a>
+    </div>
+
+    <!-- Role 2: Receiving Org -->
+    <div class="role-card">
+      <div class="role-card-badge">Relief Beneficiary</div>
+      <h3 class="role-card-title">Receiving Organization</h3>
+      <p class="role-card-desc">
+        For certified non-profits, homeless shelters, community kitchens, soup kitchens, and youth relief centers requesting food donations.
+      </p>
+      <a href="{{ url_for('auth.register_role', role='organization') }}" class="btn btn-primary btn-block">Register as Charity &rarr;</a>
+    </div>
+
+    <!-- Role 3: Volunteer -->
+    <div class="role-card">
+      <div class="role-card-badge">Dispatch Logistics</div>
+      <h3 class="role-card-title">Community Volunteer</h3>
+      <p class="role-card-desc">
+        For verified individuals with vehicles or insulated courier gear who want to transport food packages safely from donors to community shelters.
+      </p>
+      <a href="{{ url_for('auth.register_role', role='volunteer') }}" class="btn btn-primary btn-block">Join as Volunteer &rarr;</a>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: var(--space-2xl); font-size: 0.9rem; color: var(--color-text-muted);">
+    Already registered with ShareMeal? <a href="{{ url_for('auth.login') }}" style="font-weight: 600;">Sign in to your account</a>
+  </div>
+</div>
+{% endblock %}
