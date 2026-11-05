@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Collection Missions — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Available Collection Missions</h1>
+        <p class="page-subtitle">Approved food donations ready for courier pickup and transport to shelters.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('volunteer.dashboard') }}" class="btn btn-secondary">&larr; Back to Operations Hub</a>
+      </div>
+    </div>
+
+    {% if tasks %}
+      <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+        {% for task in tasks %}
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <span class="card-title">{{ task.food_name }}</span>
+                <span class="badge {% if task.urgency == 'critical' %}badge-danger{% elif task.urgency == 'urgent' %}badge-warning{% else %}badge-info{% endif %}" style="margin-left: 0.5rem;">
+                  {{ task.urgency|capitalize }} Priority
+                </span>
+              </div>
+              <div style="font-weight: 700; color: var(--color-primary); font-size: 1.15rem;">
+                {{ task.quantity_requested }} {{ task.unit }}
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6">
+                  <div style="font-size: 0.88rem; line-height: 1.7;">
+                    <div><strong>Step 1: Pick Up At</strong></div>
+                    <div>{{ task.donor_name }}</div>
+                    <div style="color:var(--color-text-muted);">{{ task.pickup_address }}</div>
+                    <div>Phone: {{ task.donor_phone }}</div>
+                    {% if task.pickup_instructions %}
+                      <div style="font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px;">
+                        <em>Instructions: {{ task.pickup_instructions }}</em>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div style="font-size: 0.88rem; line-height: 1.7;">
+                    <div><strong>Step 2: Deliver To</strong></div>
+                    <div>{{ task.organization_name }}</div>
+                    <div>Contact: {{ task.organization_contact }}</div>
+                    <div style="color:var(--color-warning); font-weight:600; margin-top: 4px;">
+                      Collection Deadline: {{ task.collection_deadline|replace('T', ' ')[:16] }}
+                    </div>
+                    <div>Storage Required: {{ task.storage_conditions|replace('_', ' ')|capitalize }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer" style="justify-content: space-between;">
+              <span style="font-size: 0.82rem; color: var(--color-text-muted);">
+                Packaging: {{ task.packaging_condition|replace('_', ' ')|capitalize }}
+              </span>
+              <form method="POST" action="{{ url_for('volunteer.accept_task', request_id=task.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary">
+                  Claim & Accept Mission &rarr;
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card" style="text-align: center; padding: 4rem 1rem; color: var(--color-text-muted);">
+        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No collection tasks currently awaiting couriers.</p>
+        <p style="font-size: 0.85rem; margin: 0;">Check back shortly or keep your notification alerts enabled.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
