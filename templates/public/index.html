@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}ShareMeal — Surplus Food Redistribution Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      Verified Social Impact Platform
+    </div>
+    <h1 class="hero-title">
+      Connecting Surplus Food Generators with <span>Community Relief</span> Kitchens
+    </h1>
+    <p class="hero-desc">
+      Every day, restaurants, bakeries, and supermarkets produce wholesome surplus food. ShareMeal connects them with verified NGOs, shelters, and volunteers with cold-chain tracking and zero waste.
+    </p>
+    <div class="hero-actions">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('auth.profile') }}" class="btn btn-primary btn-lg">Open My Portal &rarr;</a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Join the Network</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-lg">Sign In (Demo Logins)</a>
+      {% endif %}
+      <a href="{{ url_for('public.how_it_works') }}" class="btn btn-outline btn-lg">Learn How It Works</a>
+    </div>
+  </div>
+</section>
+
+<!-- Live Impact Bar -->
+<section class="impact-bar">
+  <div class="container">
+    <div class="impact-grid">
+      <div>
+        <div class="impact-number">{{ total_distributed|int }}</div>
+        <div class="impact-label">Portions / Kg Rescued & Delivered</div>
+      </div>
+      <div>
+        <div class="impact-number">{{ total_published|int }}</div>
+        <div class="impact-label">Total Quantities Published</div>
+      </div>
+      <div>
+        <div class="impact-number">{{ active_donations_count }}</div>
+        <div class="impact-label">Active Listings Ready for Pickup</div>
+      </div>
+      <div>
+        <div class="impact-number">{{ active_partners_count }}</div>
+        <div class="impact-label">Verified Organizations & Kitchens</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Four Stakeholder Roles Section -->
+<section class="roles-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Designed for Four Collaborative Roles</h2>
+      <p class="section-subtitle">
+        A coordinated ecosystem guaranteeing that surplus food moves safely and reliably from commercial kitchens to families in need.
+      </p>
+    </div>
+
+    <div class="role-grid">
+      <!-- 1. Donor -->
+      <div class="role-card">
+        <div class="role-card-badge">Commercial Donors</div>
+        <h3 class="role-card-title">Restaurants & Caterers</h3>
+        <p class="role-card-desc">
+          Easily publish surplus food with prep timestamps, storage requirements, packaging status, and pickup deadlines. Track dispatches in real-time.
+        </p>
+        <a href="{{ url_for('auth.register_role', role='donor') }}" class="btn btn-outline btn-sm">Register as Donor &rarr;</a>
+      </div>
+
+      <!-- 2. Receiving Org -->
+      <div class="role-card">
+        <div class="role-card-badge">Charitable Organizations</div>
+        <h3 class="role-card-title">NGOs & Shelters</h3>
+        <p class="role-card-desc">
+          Browse safe surplus meals, filter by category and collection deadlines, request required portions, and verify arrival with delivery confirmation.
+        </p>
+        <a href="{{ url_for('auth.register_role', role='organization') }}" class="btn btn-outline btn-sm">Register as Organization &rarr;</a>
+      </div>
+
+      <!-- 3. Volunteer -->
+      <div class="role-card">
+        <div class="role-card-badge">Logistics Support</div>
+        <h3 class="role-card-title">Community Volunteers</h3>
+        <p class="role-card-desc">
+          Accept local pickup missions, receive clear donor and shelter instructions, confirm safety checklists, and deliver food to kitchens.
+        </p>
+        <a href="{{ url_for('auth.register_role', role='volunteer') }}" class="btn btn-outline btn-sm">Join as Volunteer &rarr;</a>
+      </div>
+
+      <!-- 4. Administrator -->
+      <div class="role-card">
+        <div class="role-card-badge">Governance & Oversight</div>
+        <h3 class="role-card-title">Platform Administration</h3>
+        <p class="role-card-desc">
+          Rigorous entity verification, temperature hazard quarantine, food-safety review triage, audit logs, and compliance analytics.
+        </p>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Admin Access &rarr;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Active Showcase Listings -->
+{% if available_showcase %}
+<section style="padding: var(--space-2xl) 0; background-color: #FFFFFF; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Surplus Food Available Now</h2>
+      <p class="section-subtitle">Real-time listings from verified commercial donors in your municipality.</p>
+    </div>
+
+    <div class="row">
+      {% for don in available_showcase %}
+        <div class="col-6" style="margin-bottom: var(--space-md);">
+          <div class="card" style="height: 100%;">
+            <div class="card-header">
+              <span class="card-title">{{ don.food_name }}</span>
+              <span class="badge badge-available">Available</span>
+            </div>
+            <div class="card-body">
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+                Donor: <strong>{{ don.donor_name }}</strong> &bull; Category: <strong>{{ don.food_category|replace('_', ' ')|capitalize }}</strong>
+              </div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">
+                {{ don.quantity_available }} {{ don.unit }} available
+              </div>
+              <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+                Storage: {{ don.storage_conditions|replace('_', ' ')|capitalize }} &bull; Packaging: {{ don.packaging_condition|replace('_', ' ')|capitalize }}
+              </div>
+              <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--color-warning); font-weight: 600;">
+                Collection Deadline: {{ don.collection_deadline|replace('T', ' ')[:16] }}
+              </div>
+            </div>
+            <div class="card-footer">
+              {% if session.get('role') == 'organization' %}
+                <a href="{{ url_for('org.donation_detail', id=don.id) }}" class="btn btn-primary btn-sm">Request Portions &rarr;</a>
+              {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-sm">Sign in as NGO to Request</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Food Safety Protocol Banner -->
+<section class="container" style="padding: var(--space-2xl) 0;">
+  <div class="safety-highlight">
+    <h3 class="safety-title">Our Food Safety Commitment</h3>
+    <p>
+      ShareMeal does not treat surplus food lightly. Every listing requires explicit preparation timestamps, storage condition declarations, packaging condition checks, and allergen labeling.
+    </p>
+    <div class="safety-grid">
+      <div>
+        <div class="safety-item-title">Strict Expiry Cut-offs</div>
+        <div class="safety-item-desc">Donations past their collection deadline are automatically expired and blocked from request.</div>
+      </div>
+      <div>
+        <div class="safety-item-title">Immediate Quarantine</div>
+        <div class="safety-item-desc">Any reported temperature or sanitation issue immediately freezes the listing for admin review.</div>
+      </div>
+      <div>
+        <div class="safety-item-title">Good Samaritan Protection</div>
+        <div class="safety-item-desc">Donors acting in good faith comply with municipal standards under established liability protection statutes.</div>
+      </div>
+    </div>
+    <div style="margin-top: 1.5rem;">
+      <a href="{{ url_for('public.food_safety') }}" class="btn btn-outline btn-sm">Read Full Safety Policy &rarr;</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
