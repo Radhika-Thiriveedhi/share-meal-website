@@ -1,0 +1,16 @@
+<!-- Food Safety Quarantine Banner for Donors -->
+<div class="alert alert-danger" style="margin-bottom: var(--space-xl);">
+  <div>
+    <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem;">
+      Listing Quarantined by Food Safety Review Protocol
+    </div>
+    <div style="font-size: 0.9rem; line-height: 1.5;">
+      A participant reported a safety deviation regarding holding temperatures or packaging integrity for this listing. All volunteer pickups and portion requests have been suspended pending municipal compliance review by platform administrators.
+    </div>
+    {% if donation.safety_review_reason %}
+      <div style="margin-top: 0.5rem; font-size: 0.85rem; background: rgba(255,255,255,0.7); padding: 0.5rem; border-radius: 4px;">
+        <strong>Report Summary:</strong> {{ donation.safety_review_reason }}
+      </div>
+    {% endif %}
+  </div>
+</div>
