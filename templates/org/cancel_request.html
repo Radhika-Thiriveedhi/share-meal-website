@@ -1,0 +1,37 @@
+<!-- Cancel Request Modal Dialog -->
+<div id="cancelReqModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color: var(--color-danger);">Cancel Food Request</h4>
+      <button type="button" class="modal-close" onclick="closeModal('cancelReqModal')">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('org.cancel_request', request_id=req.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="modal-body">
+        <p style="color: var(--color-text-main); font-size: 0.92rem;">
+          Are you sure you want to cancel request <strong>{{ req.id }}</strong> for <strong>{{ req.quantity_requested }} portions</strong>?
+        </p>
+        <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1rem;">
+          Cancelling will automatically release the reserved food portions back to the donor's available inventory for other community organizations to claim.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="cancel_reason">Cancellation Reason <span class="required">*</span></label>
+          <select id="cancel_reason" name="reason" class="form-control" required>
+            <option value="Shelter capacity reached / alternative food received">Shelter capacity reached / alternative food received</option>
+            <option value="Storage refrigeration breakdown at facility">Storage refrigeration breakdown at facility</option>
+            <option value="Event canceled / meal service rescheduling">Event canceled / meal service rescheduling</option>
+            <option value="Requested duplicate quantity in error">Requested duplicate quantity in error</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('cancelReqModal')">Keep Request</button>
+        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+      </div>
+    </form>
+  </div>
+</div>
