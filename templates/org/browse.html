@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Available Surplus Food — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Browse Available Surplus Food</h1>
+        <p class="page-subtitle">Discover safe meals ready for pickup from verified commercial donors.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('org.requests_list') }}" class="btn btn-secondary">My Active Requests &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card" style="margin-bottom: var(--space-xl);">
+      <div class="card-body">
+        <form method="GET" action="{{ url_for('org.browse') }}" style="display: flex; gap: var(--space-md); flex-wrap: wrap;">
+          <div style="flex: 2; min-width: 220px;">
+            <input type="text" name="q" class="form-control" placeholder="Search by food name or donor establishment..." value="{{ search_query }}">
+          </div>
+
+          <div style="flex: 1; min-width: 180px;">
+            <select name="category" class="form-control">
+              <option value="">All Categories</option>
+              {% for val, label in categories %}
+                <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div style="flex: 1; min-width: 180px;">
+            <select name="storage_conditions" class="form-control">
+              <option value="">All Storage Types</option>
+              {% for val, label in storage_conditions %}
+                <option value="{{ val }}" {% if selected_storage == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary">Filter Listings</button>
+            <a href="{{ url_for('org.browse') }}" class="btn btn-secondary">Clear</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Listings Grid -->
+    {% if donations %}
+      <div class="row">
+        {% for don in donations %}
+          <div class="col-6" style="margin-bottom: var(--space-lg);">
+            <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+              <div class="card-header">
+                <div>
+                  <span class="card-title">{{ don.food_name }}</span>
+                  <div style="font-size: 0.8rem; color: var(--color-text-muted);">
+                    By {{ don.donor_name }} ({{ don.donor_type|capitalize }})
+                  </div>
+                </div>
+                <span class="badge badge-available">Available</span>
+              </div>
+
+              <div class="card-body" style="flex-grow: 1;">
+                <div style="font-size: 1.35rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">
+                  {{ don.quantity_available }} {{ don.unit }}
+                  <span style="font-size: 0.82rem; font-weight: normal; color: var(--color-text-muted);">(of {{ don.quantity_published }} published)</span>
+                </div>
+
+                <div style="font-size: 0.88rem; color: var(--color-text-main); margin-bottom: 0.5rem; line-height: 1.6;">
+                  <div>Category: <strong>{{ don.food_category|replace('_', ' ')|capitalize }}</strong></div>
+                  <div>Storage: <strong>{{ don.storage_conditions|replace('_', ' ')|capitalize }}</strong></div>
+                  <div>Packaging: <strong>{{ don.packaging_condition|replace('_', ' ')|capitalize }}</strong></div>
+                </div>
+
+                <div style="background-color: var(--color-warning-light); border: 1px solid var(--color-warning-border); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #78350F; font-weight: 600;">
+                  Collection Deadline: {{ don.collection_deadline|replace('T', ' ')[:16] }}
+                </div>
+              </div>
+
+              <div class="card-footer" style="justify-content: space-between;">
+                <span style="font-size: 0.8rem; color: var(--color-text-muted);">
+                  Pickup: {{ don.pickup_address[:25] }}...
+                </span>
+                <a href="{{ url_for('org.donation_detail', donation_id=don.id) }}" class="btn btn-primary btn-sm">
+                  Request Food Portions &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card" style="text-align: center; padding: 4rem 1rem;">
+        <p style="color: var(--color-text-muted); font-size: 1.05rem; margin-bottom: 1rem;">
+          No surplus food listings match your selected search or filter parameters.
+        </p>
+        <a href="{{ url_for('org.browse') }}" class="btn btn-secondary">Clear Search Filters</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
