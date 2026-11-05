@@ -1,0 +1,34 @@
+{# Reusable Status Badge Component
+   Usage: {% set status = donation.status %} {% include 'components/_badge.html' %}
+#}
+{% if status == 'available' %}
+  <span class="badge badge-available">Available</span>
+{% elif status == 'request_received' %}
+  <span class="badge badge-warning">Request Received</span>
+{% elif status == 'confirmed' %}
+  <span class="badge badge-info">Confirmed</span>
+{% elif status == 'volunteer_assigned' %}
+  <span class="badge badge-info">Volunteer Assigned</span>
+{% elif status == 'picked_up' %}
+  <span class="badge badge-info">Picked Up</span>
+{% elif status == 'delivered' %}
+  <span class="badge badge-success">Delivered</span>
+{% elif status == 'receipt_confirmed' or status == 'completed' %}
+  <span class="badge badge-completed">Completed</span>
+{% elif status == 'safety_review' or status == 'under_review' %}
+  <span class="badge badge-warning">Safety Review</span>
+{% elif status == 'expired' %}
+  <span class="badge badge-danger">Expired</span>
+{% elif status == 'cancelled' or status == 'rejected' %}
+  <span class="badge badge-danger">{{ status|replace('_', ' ')|capitalize }}</span>
+{% elif status == 'partially_fulfilled' %}
+  <span class="badge badge-warning">Partially Fulfilled</span>
+{% elif status == 'verified' %}
+  <span class="badge badge-verified">Verified</span>
+{% elif status == 'pending' %}
+  <span class="badge badge-pending">Pending Review</span>
+{% elif status == 'suspended' %}
+  <span class="badge badge-danger">Suspended</span>
+{% else %}
+  <span class="badge badge-info">{{ status|replace('_', ' ')|capitalize }}</span>
+{% endif %}
