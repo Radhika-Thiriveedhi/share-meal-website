@@ -1,0 +1,148 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-role-tag">
+      {% if session.get('role') == 'donor' %}
+        Food Donor Portal
+      {% elif session.get('role') == 'organization' %}
+        Receiving Organization
+      {% elif session.get('role') == 'volunteer' %}
+        Volunteer Dispatch
+      {% elif session.get('role') == 'admin' %}
+        Platform Administrator
+      {% endif %}
+    </div>
+    <div class="sidebar-user-org">
+      {{ session.get('org_name') or session.get('name', 'User') }}
+    </div>
+  </div>
+
+  <ul class="sidebar-menu">
+    <!-- DONOR MENU -->
+    {% if session.get('role') == 'donor' %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('donor.dashboard') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <span>Overview</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('donor.create_donation') }}" class="sidebar-link {% if active_page == 'create_donation' %}active{% endif %}">
+          <span>+ Donate Food</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('donor.donations_list') }}" class="sidebar-link {% if active_page == 'donations' %}active{% endif %}">
+          <span>My Listings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('donor.requests_list') }}" class="sidebar-link {% if active_page == 'requests' %}active{% endif %}">
+          <span>Incoming Requests</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('donor.history') }}" class="sidebar-link {% if active_page == 'history' %}active{% endif %}">
+          <span>Donation History</span>
+        </a>
+      </li>
+
+    <!-- RECEIVING ORG MENU -->
+    {% elif session.get('role') == 'organization' %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('org.dashboard') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <span>Overview</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('org.browse') }}" class="sidebar-link {% if active_page == 'browse' %}active{% endif %}">
+          <span>Browse Available Food</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('org.requests_list') }}" class="sidebar-link {% if active_page == 'requests' %}active{% endif %}">
+          <span>My Requests</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('org.history') }}" class="sidebar-link {% if active_page == 'history' %}active{% endif %}">
+          <span>Distribution History</span>
+        </a>
+      </li>
+
+    <!-- VOLUNTEER MENU -->
+    {% elif session.get('role') == 'volunteer' %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('volunteer.dashboard') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <span>My Tasks</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('volunteer.tasks_available') }}" class="sidebar-link {% if active_page == 'available_tasks' %}active{% endif %}">
+          <span>Available Missions</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('volunteer.history') }}" class="sidebar-link {% if active_page == 'history' %}active{% endif %}">
+          <span>Completed Missions</span>
+        </a>
+      </li>
+
+    <!-- ADMIN MENU -->
+    {% elif session.get('role') == 'admin' %}
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+          <span>Admin Overview</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.verifications') }}" class="sidebar-link {% if active_page == 'verifications' %}active{% endif %}">
+          <span>Verifications</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.users') }}" class="sidebar-link {% if active_page == 'users' %}active{% endif %}">
+          <span>User Accounts</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.donations') }}" class="sidebar-link {% if active_page == 'donations' %}active{% endif %}">
+          <span>All Donations</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.requests') }}" class="sidebar-link {% if active_page == 'requests' %}active{% endif %}">
+          <span>All Requests</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.safety_reports') }}" class="sidebar-link {% if active_page == 'safety' %}active{% endif %}">
+          <span>Safety Reports</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.analytics') }}" class="sidebar-link {% if active_page == 'analytics' %}active{% endif %}">
+          <span>Analytics & Trends</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.reports') }}" class="sidebar-link {% if active_page == 'reports' %}active{% endif %}">
+          <span>Export Reports</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.audit_logs') }}" class="sidebar-link {% if active_page == 'audit' %}active{% endif %}">
+          <span>Audit Logs</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.backups') }}" class="sidebar-link {% if active_page == 'backups' %}active{% endif %}">
+          <span>Data Backups</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+
+  <div class="sidebar-footer">
+    <div>Verification: <strong style="color:var(--color-primary);">{{ session.get('verification_status', 'verified')|capitalize }}</strong></div>
+    <div style="margin-top:4px;"><a href="{{ url_for('auth.profile') }}">Account Settings &rarr;</a></div>
+  </div>
+</aside>
