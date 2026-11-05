@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}My Notifications — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 800px;">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Internal Notifications</h1>
+      <p class="page-subtitle">Real-time status updates, volunteer assignments, and safety review notices.</p>
+    </div>
+    {% if notifications %}
+      <div>
+        <a href="{{ url_for('notifications.mark_all_read') }}" class="btn btn-secondary btn-sm">Mark All as Read</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+    <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+      {% for n in notifications %}
+        <div class="card" style="border-left: 4px solid {% if n.type == 'warning' %}var(--color-warning){% elif n.type == 'danger' %}var(--color-danger){% elif n.type == 'success' %}var(--color-primary){% else %}var(--color-border-dark){% endif %}; {% if not n.is_read %}background-color: #FAFCF9;{% endif %}">
+          <div class="card-body" style="padding: 1rem 1.25rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                {{ n.title }}
+                {% if not n.is_read %}
+                  <span class="badge badge-warning" style="font-size: 0.65rem;">New</span>
+                {% endif %}
+              </div>
+              <div style="font-size: 0.88rem; color: var(--color-text-main); margin-bottom: 0.4rem;">
+                {{ n.message }}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--color-text-muted);">
+                {{ n.created_at[:16]|replace('T', ' ') }}
+              </div>
+            </div>
+
+            {% if n.link %}
+              <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}" class="btn btn-outline btn-sm" style="white-space: nowrap;">
+                View Details &rarr;
+              </a>
+            {% elif not n.is_read %}
+              <a href="{{ url_for('notifications.mark_read', notif_id=n.id) }}" class="btn btn-secondary btn-sm">
+                Mark Read
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1rem;">
+      <p style="color: var(--color-text-muted); margin: 0;">You have no notifications at this time.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
