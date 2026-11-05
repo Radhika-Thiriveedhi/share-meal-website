@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from services.request_service import RequestService
 from services.donation_service import DonationService
+from services.safety_service import SafetyService
 from services.audit_service import AuditService
 from services.notification_service import NotificationService
 from storage.json_storage import storage
@@ -167,7 +168,6 @@ def confirm_receipt(request_id):
         now = datetime.utcnow().isoformat()
         qty = float(req.get('quantity_requested', 0))
 
-        # 1. Update request to receipt_confirmed
         storage.update(Config.REQUESTS_FILE, request_id, {
             'status': 'receipt_confirmed',
             'confirmed_time': now,
@@ -175,7 +175,6 @@ def confirm_receipt(request_id):
             'recipient_feedback': feedback.strip()
         })
 
-        # 2. Update donation: add to distributed, decrement reserved
         if donation:
             curr_reserved = max(0.0, float(donation.get('quantity_reserved', 0)) - qty)
             curr_distributed = float(donation.get('quantity_distributed', 0)) + qty
@@ -190,7 +189,6 @@ def confirm_receipt(request_id):
                 'status': new_don_status
             })
 
-            # Notify donor
             NotificationService.send_notification(
                 user_id=donation['donor_id'],
                 title="Donation Receipt Confirmed!",
@@ -199,7 +197,6 @@ def confirm_receipt(request_id):
                 link="/donor/history"
             )
 
-        # Notify volunteer
         if req.get('volunteer_id'):
             NotificationService.send_notification(
                 user_id=req['volunteer_id'],
@@ -220,6 +217,38 @@ def confirm_receipt(request_id):
         return redirect(url_for('org.history'))
 
     return render_template('org/confirm_receipt.html', req=req, donation=donation)
+
+@org_bp.route('/requests/<request_id>/report-safety', methods=['GET', 'POST'])
+@login_required
+@role_required('organization')
+@verified_required
+def report_safety(request_id):
+    """Receiving charity reports unsafe or spoiled food."""
+    org_id = session.get('user_id')
+    req = RequestService.get_request_by_id(request_id)
+    if not req or req.get('organization_id') != org_id:
+        flash("Request not found.", "danger")
+        return redirect(url_for('org.requests_list'))
+
+    donation = DonationService.get_donation_by_id(req.get('donation_id'))
+
+    if request.method == 'POST':
+        report_type = request.form.get('report_type')
+        description = request.form.get('description', '')
+
+        SafetyService.file_report(
+            donation_id=donation['id'],
+            reporter_id=org_id,
+            reporter_role='organization',
+            reporter_name=session.get('org_name') or session.get('name'),
+            report_type=report_type,
+            description=description,
+            request_id=request_id
+        )
+        flash("Food safety report filed. Listing quarantined and administrators alerted.", "warning")
+        return redirect(url_for('org.requests_list'))
+
+    return render_template('org/report_safety.html', req=req, donation=donation)
 
 @org_bp.route('/history')
 @login_required
