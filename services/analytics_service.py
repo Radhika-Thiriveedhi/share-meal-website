@@ -1,3 +1,5 @@
+import io
+import csv
 from storage.json_storage import storage
 from config import Config
 from collections import defaultdict
@@ -31,7 +33,7 @@ class AnalyticsService:
         expired_count = len([d for d in donations if d.get('status') == 'expired'])
         cancelled_count = len([d for d in donations if d.get('status') == 'cancelled'])
 
-        # Environmental impacts
+        # Environmental impacts: 2.5 kg CO2e / kg rescued, 450 L water / kg rescued
         co2_saved = round(total_distributed * 2.5, 1)
         water_saved = round(total_distributed * 450, 0)
 
@@ -103,3 +105,25 @@ class AnalyticsService:
         leaderboard = list(org_stats.values())
         leaderboard.sort(key=lambda x: x['received'], reverse=True)
         return leaderboard[:limit]
+
+    @staticmethod
+    def generate_donations_csv():
+        """Export all donations as CSV string for reporting."""
+        donations = storage.find_all(Config.DONATIONS_FILE)
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Donation ID', 'Donor Name', 'Food Item', 'Category', 'Published Qty', 'Distributed Qty', 'Unit', 'Status', 'Created At'])
+
+        for d in donations:
+            writer.writerow([
+                d.get('id'),
+                d.get('donor_name'),
+                d.get('food_name'),
+                d.get('food_category'),
+                d.get('quantity_published'),
+                d.get('quantity_distributed'),
+                d.get('unit'),
+                d.get('status'),
+                d.get('created_at', '')[:10]
+            ])
+        return output.getvalue()
