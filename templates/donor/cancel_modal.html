@@ -1,0 +1,37 @@
+<!-- Cancel Donation Modal Dialog -->
+<div id="cancelModal" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h4 class="modal-title" style="color: var(--color-danger);">Cancel Food Donation</h4>
+      <button type="button" class="modal-close" onclick="closeModal('cancelModal')">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('donor.cancel_donation', donation_id=donation.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      
+      <div class="modal-body">
+        <p style="color: var(--color-text-main); font-size: 0.92rem;">
+          Are you sure you want to cancel the listing for <strong>{{ donation.food_name }}</strong>?
+        </p>
+        <p style="font-size: 0.85rem; color: var(--color-danger); margin-bottom: 1rem;">
+          Warning: Cancelling will revoke any pending charity requests and release reserved volunteer dispatches.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="cancel_reason">Reason for Cancellation <span class="required">*</span></label>
+          <select id="cancel_reason" name="reason" class="form-control" required>
+            <option value="Food reached temperature threshold early">Food reached temperature threshold early</option>
+            <option value="Packaging compromised in kitchen">Packaging compromised in kitchen</option>
+            <option value="Food redistributed through internal emergency meal service">Food redistributed through internal emergency service</option>
+            <option value="Operational schedule change">Operational schedule change</option>
+            <option value="Other">Other reason</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('cancelModal')">Keep Listing Active</button>
+        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+      </div>
+    </form>
+  </div>
+</div>
