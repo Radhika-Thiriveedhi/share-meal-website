@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}User Directory & Security — Admin Console{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">User Account Directory</h1>
+        <p class="page-subtitle">Manage platform participants, credentials, and access authorization.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Role Filter Pills -->
+    <div style="margin-bottom: var(--space-md); display: flex; gap: var(--space-xs); flex-wrap: wrap;">
+      <a href="{{ url_for('admin.users', role='all') }}" class="btn btn-sm {% if role_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All Roles</a>
+      <a href="{{ url_for('admin.users', role='donor') }}" class="btn btn-sm {% if role_filter == 'donor' %}btn-primary{% else %}btn-secondary{% endif %}">Donors</a>
+      <a href="{{ url_for('admin.users', role='organization') }}" class="btn btn-sm {% if role_filter == 'organization' %}btn-primary{% else %}btn-secondary{% endif %}">Charities</a>
+      <a href="{{ url_for('admin.users', role='volunteer') }}" class="btn btn-sm {% if role_filter == 'volunteer' %}btn-primary{% else %}btn-secondary{% endif %}">Volunteers</a>
+      <a href="{{ url_for('admin.users', role='admin') }}" class="btn btn-sm {% if role_filter == 'admin' %}btn-primary{% else %}btn-secondary{% endif %}">Administrators</a>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name / Organization</th>
+              <th>Role</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Verification</th>
+              <th>Account Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td>
+                  <strong>{{ u.name }}</strong>
+                  {% if u.org_name and u.org_name != u.name %}
+                    <div style="font-size:0.75rem; color:var(--color-text-muted);">{{ u.org_name }}</div>
+                  {% endif %}
+                </td>
+                <td><span class="badge badge-info">{{ u.role|capitalize }}</span></td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.phone or 'N/A' }}</td>
+                <td>
+                  {% set status = u.verification_status %}
+                  {% include 'components/_badge.html' %}
+                </td>
+                <td>
+                  {% if u.is_active %}
+                    <span class="badge badge-success">Active</span>
+                  {% else %}
+                    <span class="badge badge-danger">Suspended</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if u.role != 'admin' %}
+                    <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=u.id) }}" style="display:inline;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      {% if u.is_active %}
+                        <button type="submit" class="btn btn-secondary btn-sm" data-confirm="Suspend this user account?">Suspend</button>
+                      {% else %}
+                        <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
+                      {% endif %}
+                    </form>
+                  {% else %}
+                    <span style="font-size:0.75rem; color:var(--color-text-muted);">Protected</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
