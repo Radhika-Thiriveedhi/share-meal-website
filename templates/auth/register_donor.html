@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Commercial Food Donor — ShareMeal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: var(--space-2xl) var(--space-md); max-width: 700px;">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <span class="badge badge-available" style="margin-bottom: 0.25rem;">Food Donor Onboarding</span>
+        <h2 style="font-size: 1.35rem; margin: 0;">Register Food Establishment</h2>
+      </div>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-secondary btn-sm">&larr; Change Role</a>
+    </div>
+
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('auth.register_role', role='donor') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          1. Business Details
+        </h4>
+
+        <div class="row">
+          <div class="col-8">
+            <div class="form-group">
+              <label class="form-label" for="org_name">Business / Establishment Name <span class="required">*</span></label>
+              <input type="text" id="org_name" name="org_name" class="form-control" placeholder="e.g. GreenBites Bistro" required>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label" for="org_type">Establishment Type <span class="required">*</span></label>
+              <select id="org_type" name="org_type" class="form-control" required>
+                <option value="">Select type...</option>
+                <option value="restaurant">Restaurant / Dining</option>
+                <option value="hotel">Hotel / Catering</option>
+                <option value="supermarket">Supermarket / Grocery</option>
+                <option value="bakery">Bakery / Patisserie</option>
+                <option value="event_organizer">Event / Banquet Hall</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="license_number">Food Service License # <span class="required">*</span></label>
+              <input type="text" id="license_number" name="license_number" class="form-control" placeholder="FDB-XXXX-XXXX" required>
+              <div class="form-hint">Used for admin regulatory verification.</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="tax_id">Tax / Business Registration ID <span class="required">*</span></label>
+              <input type="text" id="tax_id" name="tax_id" class="form-control" placeholder="TAX-XXXXXXX" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="operating_hours">Kitchen Operating Hours</label>
+          <input type="text" id="operating_hours" name="operating_hours" class="form-control" placeholder="e.g. 09:00 AM - 11:00 PM Daily">
+        </div>
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+          2. Physical Pickup Location
+        </h4>
+
+        <div class="form-group">
+          <label class="form-label" for="address">Street Address (Kitchen/Dock) <span class="required">*</span></label>
+          <input type="text" id="address" name="address" class="form-control" placeholder="123 Culinary Boulevard" required>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="city">City <span class="required">*</span></label>
+              <input type="text" id="city" name="city" class="form-control" placeholder="Metropolis" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="postal_code">Postal Code <span class="required">*</span></label>
+              <input type="text" id="postal_code" name="postal_code" class="form-control" placeholder="94102" required>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">
+          3. Account Representative & Credentials
+        </h4>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="name">Primary Contact Name <span class="required">*</span></label>
+              <input type="text" id="name" name="name" class="form-control" placeholder="Chef / General Manager" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="phone">Direct Phone <span class="required">*</span></label>
+              <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 (555) 000-0000" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="email">Account Email <span class="required">*</span></label>
+              <input type="email" id="email" name="email" class="form-control" placeholder="manager@bistro.com" required>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label" for="password">Password <span class="required">*</span></label>
+              <input type="password" id="password" name="password" class="form-control" data-validate-strength data-feedback-id="pwd-hint" required>
+              <div id="pwd-hint" class="form-hint">8+ chars with uppercase, lowercase, & number.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-check" style="margin-top: 1rem;">
+          <input type="checkbox" id="compliance_agree" name="compliance_agree" class="form-check-input" required>
+          <label class="form-check-label" for="compliance_agree">
+            I certify that all surplus donations originate from inspected food-grade premises complying with municipal food codes.
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+          Submit Food Donor Application &rarr;
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
