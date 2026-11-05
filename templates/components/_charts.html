@@ -1,0 +1,27 @@
+{# Reusable CSS-driven chart snippets and progress widgets (Zero external dependencies) #}
+
+{% macro progress_bar(value, max_value, color='var(--color-primary)', height='8px', show_label=true) %}
+  {% set pct = 0 %}
+  {% if max_value and max_value > 0 %}
+    {% set pct = ((value / max_value) * 100)|round(1) %}
+    {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+  {% endif %}
+  <div class="progress-widget" style="width: 100%;">
+    {% if show_label %}
+      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px; color: var(--color-text-muted);">
+        <span>{{ value }} / {{ max_value }}</span>
+        <span><strong>{{ pct }}%</strong></span>
+      </div>
+    {% endif %}
+    <div style="width: 100%; height: {{ height }}; background-color: var(--color-bg-subtle); border-radius: 999px; overflow: hidden; border: 1px solid var(--color-border);">
+      <div style="width: {{ pct }}%; height: 100%; background-color: {{ color }}; border-radius: 999px; transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro stat_pill(label, value, trend=none) %}
+  <div style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; background-color: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 16px; font-size: 0.85rem;">
+    <span style="color: var(--color-text-muted);">{{ label }}:</span>
+    <strong style="color: var(--color-text-main);">{{ value }}</strong>
+  </div>
+{% endmacro %}
