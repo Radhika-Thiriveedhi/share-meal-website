@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Listing — {{ donation.food_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  {% include 'components/_sidebar.html' %}
+
+  <div class="dashboard-content" style="max-width: 900px;">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Edit Food Donation Listing</h1>
+        <p class="page-subtitle">Modifying listing {{ donation.id }}. Note: Only unreserved listings can be edited.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('donor.donation_detail', donation_id=donation.id) }}" class="btn btn-secondary">&larr; Cancel Editing</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('donor.edit_donation', donation_id=donation.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="row">
+            <div class="col-8">
+              <div class="form-group">
+                <label class="form-label" for="food_name">Food Item Name <span class="required">*</span></label>
+                <input type="text" id="food_name" name="food_name" class="form-control" value="{{ donation.food_name }}" required>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="form-group">
+                <label class="form-label" for="food_category">Category <span class="required">*</span></label>
+                <select id="food_category" name="food_category" class="form-control" required>
+                  {% for val, label in categories %}
+                    <option value="{{ val }}" {% if donation.food_category == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="quantity_published">Quantity Available <span class="required">*</span></label>
+                <input type="number" step="0.1" min="0.1" id="quantity_published" name="quantity_published" class="form-control" value="{{ donation.quantity_published }}" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="unit">Unit <span class="required">*</span></label>
+                <input type="text" id="unit" name="unit" class="form-control" value="{{ donation.unit }}" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="collection_deadline">Collection Deadline <span class="required">*</span></label>
+                <input type="datetime-local" id="collection_deadline" name="collection_deadline" class="form-control" value="{{ donation.collection_deadline[:16] }}" required>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label class="form-label" for="storage_conditions">Storage Holding <span class="required">*</span></label>
+                <select id="storage_conditions" name="storage_conditions" class="form-control" required>
+                  {% for val, label in storage_conditions %}
+                    <option value="{{ val }}" {% if donation.storage_conditions == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup_address">Pickup Address <span class="required">*</span></label>
+            <input type="text" id="pickup_address" name="pickup_address" class="form-control" value="{{ donation.pickup_address }}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="pickup_instructions">Pickup Instructions</label>
+            <textarea id="pickup_instructions" name="pickup_instructions" class="form-control" rows="2">{{ donation.pickup_instructions }}</textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+            Save Listing Updates &rarr;
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
